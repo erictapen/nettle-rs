@@ -8,7 +8,7 @@ use std::default::Default;
 use std::mem::zeroed;
 use Hash;
 
-/// 256 bit variant of the Secure Hash Algorithm 2 (SHA-2) defined in FIPS 180-4
+/// 256 bit variant of the Secure Hash Algorithm 2 (SHA-2) defined in FIPS 180-4.
 pub struct Sha256 {
     context: sha256_ctx,
 }
