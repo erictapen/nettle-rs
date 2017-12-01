@@ -8,6 +8,7 @@ use std::default::Default;
 use std::mem::zeroed;
 use Hash;
 
+#[allow(non_camel_case_types)]
 /// 512 bit variant of the Secure Hash Algorithm 2 (SHA-2) defined in FIPS 180-4, truncated to 256
 /// bit.
 pub struct Sha512_256 {
