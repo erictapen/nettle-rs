@@ -1,36 +1,6 @@
 extern crate nettle_sys;
 
-mod hash;
-pub use hash::Hash;
-mod sha1;
-pub use sha1::Sha1;
-mod md2;
-pub use md2::Md2;
-mod md4;
-pub use md4::Md4;
-mod md5;
-pub use md5::Md5;
-mod ripemd160;
-pub use ripemd160::Ripemd160;
-mod gosthash94;
-pub use gosthash94::GostHash94;
-mod sha224;
-pub use sha224::Sha224;
-mod sha256;
-pub use sha256::Sha256;
-mod sha512_224;
-pub use sha512_224::Sha512_224;
-mod sha512_256;
-pub use sha512_256::Sha512_256;
-mod sha384;
-pub use sha384::Sha384;
-mod sha512;
-pub use sha512::Sha512;
-mod sha3_224;
-pub use sha3_224::Sha3_224;
-mod sha3_256;
-pub use sha3_256::Sha3_256;
-mod sha3_384;
-pub use sha3_384::Sha3_384;
-mod sha3_512;
-pub use sha3_512::Sha3_512;
+pub mod hash;
+pub use hash::{
+    Hash,
+};
