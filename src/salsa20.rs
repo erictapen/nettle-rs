@@ -7,19 +7,20 @@ use nettle_sys::{
 };
 use std::mem::zeroed;
 
-/// D.J. Bernstein's Salsa20_128 block cipher.
+#[allow(non_camel_case_types)]
+/// 128 bit variant of D.J. Bernstein's Salsa20 block cipher.
 pub struct Salsa20_128 {
     context: salsa20_ctx,
 }
 
 impl Salsa20_128 {
-    /// Salsa20_128 block size in bytes.
+    /// Salsa20 block size in bytes.
     pub const BLOCK_SIZE: usize = ::nettle_sys::SALSA20_BLOCK_SIZE as usize;
 
-    /// Salsa20_128 key size in bytes.
+    /// Salsa20 key size in bytes.
     pub const KEY_SIZE: usize = ::nettle_sys::SALSA20_128_KEY_SIZE as usize;
 
-    /// Salsa20_128 nonce size in bytes.
+    /// Salsa20 nonce size in bytes.
     pub const NONCE_SIZE: usize = ::nettle_sys::SALSA20_NONCE_SIZE as usize;
 
     /// Create a new instance with `key`.
@@ -43,19 +44,20 @@ impl Salsa20_128 {
     }
 }
 
-/// D.J. Bernstein's Salsa20_256 block cipher.
+#[allow(non_camel_case_types)]
+/// 256 bit variant of D.J. Bernstein's Salsa20 block cipher.
 pub struct Salsa20_256 {
     context: salsa20_ctx,
 }
 
 impl Salsa20_256 {
-    /// Salsa20_256 block size in bytes.
+    /// Salsa20 block size in bytes.
     pub const BLOCK_SIZE: usize = ::nettle_sys::SALSA20_BLOCK_SIZE as usize;
 
-    /// Salsa20_256 key size in bytes.
+    /// Salsa20 key size in bytes.
     pub const KEY_SIZE: usize = ::nettle_sys::SALSA20_256_KEY_SIZE as usize;
 
-    /// Salsa20_256 nonce size in bytes.
+    /// Salsa20 nonce size in bytes.
     pub const NONCE_SIZE: usize = ::nettle_sys::SALSA20_NONCE_SIZE as usize;
 
     /// Create a new instance with `key`.
