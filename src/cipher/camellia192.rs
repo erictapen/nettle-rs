@@ -6,7 +6,9 @@ use nettle_sys::{
     nettle_camellia256_crypt,
 };
 use std::mem::zeroed;
+use std::os::raw::c_void;
 use Cipher;
+use cipher::RawCipherFunctionPointer;
 
 /// 192 bit variant of the Camellia block cipher developed by Mitsubishi & NTT, defined in RFC 3713.
 pub struct Camellia192 {
@@ -63,6 +65,18 @@ impl Cipher for Camellia192 {
 
     fn decrypt(&mut self, dst: &mut [u8], src: &[u8]) {
         self.crypt(dst,src)
+    }
+
+    fn context(&mut self) -> *mut c_void {
+        ((&mut self.context) as *mut camellia256_ctx) as *mut c_void
+    }
+
+    fn raw_encrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_camellia256_crypt)
+    }
+
+    fn raw_decrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_camellia256_crypt)
     }
 }
 

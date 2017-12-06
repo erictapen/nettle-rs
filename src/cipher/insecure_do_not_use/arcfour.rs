@@ -4,7 +4,9 @@ use nettle_sys::{
     nettle_arcfour_crypt,
 };
 use std::mem::zeroed;
+use std::os::raw::c_void;
 use Cipher;
+use cipher::RawCipherFunctionPointer;
 
 /// Ron Rivest's RC4 stream cipher.
 /// # Note
@@ -34,6 +36,8 @@ impl ArcFour {
 impl Cipher for ArcFour {
     const BLOCK_SIZE: usize = 1;
     const KEY_SIZE: usize = ::nettle_sys::ARCFOUR_MAX_KEY_SIZE as usize;
+    const RAW_DECRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_arcfour_crypt;
+    const RAW_ENCRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_arcfour_crypt;
 
     fn with_encrypt_key(key: &[u8]) -> ArcFour {
         ArcFour::with_key(key)
@@ -49,6 +53,10 @@ impl Cipher for ArcFour {
 
     fn decrypt(&mut self, dst: &mut [u8], src: &[u8]) {
         self.crypt(dst,src)
+    }
+
+    fn context(&mut self) -> *mut c_void {
+        self.context.as_mut_ptr()
     }
 }
 

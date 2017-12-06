@@ -6,7 +6,9 @@ use nettle_sys::{
     nettle_arctwo_decrypt,
 };
 use std::mem::zeroed;
+use std::os::raw::c_void;
 use Cipher;
+use cipher::RawCipherFunctionPointer;
 
 /// Ron Rivest's RC2 block cipher defined RFC 2268.
 /// # Note
@@ -38,6 +40,8 @@ impl ArcTwo {
 impl Cipher for ArcTwo {
     const BLOCK_SIZE: usize = 1;
     const KEY_SIZE: usize = ::nettle_sys::ARCTWO_MAX_KEY_SIZE as usize;
+    const RAW_DECRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_arctwo_decrypt;
+    const RAW_ENCRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_arctwo_encrypt;
 
     fn with_encrypt_key(key: &[u8]) -> ArcTwo {
         ArcTwo::with_key(key)
@@ -59,6 +63,10 @@ impl Cipher for ArcTwo {
         unsafe {
             nettle_arctwo_decrypt(&mut self.context as *mut _, dst.len(), dst.as_mut_ptr(), src.as_ptr())
         };
+    }
+
+    fn context(&mut self) -> *mut c_void {
+        self.context.as_mut_ptr()
     }
 }
 

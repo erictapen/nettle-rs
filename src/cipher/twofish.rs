@@ -5,7 +5,9 @@ use nettle_sys::{
     nettle_twofish_decrypt,
 };
 use std::mem::zeroed;
+use std::os::raw::c_void;
 use Cipher;
+use cipher::RawCipherFunctionPointer;
 
 /// The Twofish block cipher.
 pub struct Twofish {
@@ -46,6 +48,18 @@ impl Cipher for Twofish {
         unsafe {
             nettle_twofish_decrypt(&mut self.context as *mut _, dst.len(), dst.as_mut_ptr(), src.as_ptr())
         };
+    }
+
+    fn context(&mut self) -> *mut c_void {
+        ((&mut self.context) as *mut twofish_ctx) as *mut c_void
+    }
+
+    fn raw_encrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_twofish_encrypt)
+    }
+
+    fn raw_decrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_twofish_decrypt)
     }
 }
 

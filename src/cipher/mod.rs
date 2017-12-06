@@ -1,10 +1,14 @@
 //! Block and stream ciphers.
 
-pub mod insecure_do_not_use;
+//pub mod insecure_do_not_use;
 
 mod cipher;
-pub use self::cipher::Cipher;
-mod aes128;
+pub use self::cipher::{
+    Cipher,
+    RawCipherFunctionPointer,
+};
+
+/*mod aes128;
 pub use self::aes128::Aes128;
 mod aes192;
 pub use self::aes192::Aes192;
@@ -13,7 +17,7 @@ pub use self::aes256::Aes256;
 
 mod blowfish;
 pub use self::blowfish::Blowfish;
-
+*/
 mod camellia128;
 pub use self::camellia128::Camellia128;
 mod camellia192;

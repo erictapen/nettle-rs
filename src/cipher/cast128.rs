@@ -5,7 +5,9 @@ use nettle_sys::{
     nettle_cast128_decrypt,
 };
 use std::mem::zeroed;
+use std::os::raw::c_void;
 use Cipher;
+use cipher::RawCipherFunctionPointer;
 
 /// The CAST-128 block cipher defined in RFC 2144.
 pub struct Cast128 {
@@ -46,6 +48,18 @@ impl Cipher for Cast128 {
         unsafe {
             nettle_cast128_decrypt(&mut self.context as *mut _, dst.len(), dst.as_mut_ptr(), src.as_ptr())
         };
+    }
+
+    fn context(&mut self) -> *mut c_void {
+        ((&mut self.context) as *mut cast128_ctx) as *mut c_void
+    }
+
+    fn raw_encrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_cast128_encrypt)
+    }
+
+    fn raw_decrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_cast128_decrypt)
     }
 }
 

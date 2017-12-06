@@ -7,7 +7,9 @@ use nettle_sys::{
     nettle_des_fix_parity,
 };
 use std::mem::zeroed;
+use std::os::raw::c_void;
 use Cipher;
+use cipher::RawCipherFunctionPointer;
 
 /// The Data Encryption Standard (DES) defined in FIPS 46-3.
 /// # Note
@@ -45,6 +47,8 @@ impl Des {
 impl Cipher for Des {
     const BLOCK_SIZE: usize = ::nettle_sys::DES_BLOCK_SIZE as usize;
     const KEY_SIZE: usize = ::nettle_sys::DES_KEY_SIZE as usize;
+    const RAW_DECRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_des_decrypt;
+    const RAW_ENCRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_des_encrypt;
 
     fn with_encrypt_key(key: &[u8]) -> Des {
         Des::with_key(key)
@@ -66,6 +70,10 @@ impl Cipher for Des {
         unsafe {
             nettle_des_decrypt(&mut self.context as *mut _, dst.len(), dst.as_mut_ptr(), src.as_ptr())
         };
+    }
+
+    fn context(&mut self) -> *mut c_void {
+        self.context.as_mut_ptr()
     }
 }
 

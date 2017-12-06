@@ -5,7 +5,9 @@ use nettle_sys::{
     nettle_des3_decrypt,
 };
 use std::mem::zeroed;
+use std::os::raw::c_void;
 use Cipher;
+use cipher::RawCipherFunctionPointer;
 
 /// Triple DES in EDE configuration defined in RFC 1851.
 pub struct Des3 {
@@ -47,6 +49,18 @@ impl Cipher for Des3 {
         unsafe {
             nettle_des3_decrypt(&mut self.context as *mut _, dst.len(), dst.as_mut_ptr(), src.as_ptr())
         };
+    }
+
+    fn context(&mut self) -> *mut c_void {
+        ((&mut self.context) as *mut des3_ctx) as *mut c_void
+    }
+
+    fn raw_encrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_des3_encrypt)
+    }
+
+    fn raw_decrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_des3_decrypt)
     }
 }
 

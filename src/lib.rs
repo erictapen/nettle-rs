@@ -9,3 +9,6 @@ pub mod cipher;
 pub use cipher::{
     Cipher,
 };
+
+mod cbc;
+pub use cbc::Cbc;

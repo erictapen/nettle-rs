@@ -7,7 +7,9 @@ use nettle_sys::{
     nettle_aes256_decrypt,
 };
 use std::mem::zeroed;
+use std::os::raw::c_void;
 use Cipher;
+use cipher::RawCipherFunctionPointer;
 
 /// 256 bit variant of the Advanced Encryption Standard (AES, formerly RIJNDAEL) defined in FIPS 197.
 pub struct Aes256 {
@@ -31,6 +33,8 @@ impl Aes256 {
 impl Cipher for Aes256 {
     const BLOCK_SIZE: usize = ::nettle_sys::AES_BLOCK_SIZE as usize;
     const KEY_SIZE: usize = ::nettle_sys::AES256_KEY_SIZE as usize;
+    const RAW_DECRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_aes256_decrypt;
+    const RAW_ENCRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_aes256_encrypt;
 
     fn with_encrypt_key(key: &[u8]) -> Aes256 {
         assert_eq!(key.len(), 256 / 8);
@@ -62,6 +66,10 @@ impl Cipher for Aes256 {
         unsafe {
             nettle_aes256_decrypt(&mut self.context as *mut _, dst.len(), dst.as_mut_ptr(), src.as_ptr())
         };
+    }
+
+    fn context(&mut self) -> *mut c_void {
+        self.context.as_mut_ptr()
     }
 }
 
