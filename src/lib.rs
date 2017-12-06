@@ -50,3 +50,9 @@ pub use salsa20r12::{
     Salsa20R12_128,
     Salsa20R12_256,
 };
+
+mod serpent;
+pub use serpent::Serpent;
+
+mod twofish;
+pub use twofish::Twofish;
