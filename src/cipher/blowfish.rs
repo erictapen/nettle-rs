@@ -31,8 +31,6 @@ impl Blowfish {
 impl Cipher for Blowfish {
     const BLOCK_SIZE: usize = ::nettle_sys::BLOWFISH_BLOCK_SIZE as usize;
     const KEY_SIZE: usize = ::nettle_sys::BLOWFISH_MAX_KEY_SIZE as usize;
-    const RAW_DECRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_blowfish_decrypt;
-    const RAW_ENCRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_blowfish_encrypt;
 
     fn with_encrypt_key(key: &[u8]) -> Blowfish {
         Blowfish::with_key(key)
@@ -57,7 +55,15 @@ impl Cipher for Blowfish {
     }
 
     fn context(&mut self) -> *mut c_void {
-        self.context.as_mut_ptr()
+        ((&mut self.context) as *mut blowfish_ctx) as *mut c_void
+    }
+
+    fn raw_encrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_blowfish_encrypt)
+    }
+
+    fn raw_decrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_blowfish_decrypt)
     }
 }
 

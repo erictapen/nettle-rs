@@ -6,7 +6,7 @@ pub struct RawCipherFunctionPointer {
 }
 
 impl RawCipherFunctionPointer {
-    pub fn new<T>(f: unsafe extern "C" fn(*const T, usize, *mut u8, *const u8)) -> Self {
+    pub fn new<T>(f: unsafe extern "C" fn(T, usize, *mut u8, *const u8)) -> Self {
         let ret: extern "C" fn(*const c_void, usize, *mut u8, *const u8) = unsafe {
             ::std::mem::transmute(f as *const c_void)
         };

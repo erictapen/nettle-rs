@@ -33,8 +33,6 @@ impl Aes128 {
 impl Cipher for Aes128 {
     const BLOCK_SIZE: usize = ::nettle_sys::AES_BLOCK_SIZE as usize;
     const KEY_SIZE: usize = ::nettle_sys::AES128_KEY_SIZE as usize;
-    const RAW_DECRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_aes128_decrypt;
-    const RAW_ENCRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_aes128_encrypt;
 
     fn with_encrypt_key(key: &[u8]) -> Aes128 {
         assert_eq!(key.len(), 128 / 8);
@@ -69,7 +67,15 @@ impl Cipher for Aes128 {
     }
 
     fn context(&mut self) -> *mut c_void {
-        self.context.as_mut_ptr()
+        ((&mut self.context) as *mut aes128_ctx) as *mut c_void
+    }
+
+    fn raw_encrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_aes128_encrypt)
+    }
+
+    fn raw_decrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_aes128_decrypt)
     }
 }
 

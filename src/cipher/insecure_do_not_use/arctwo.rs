@@ -38,10 +38,8 @@ impl ArcTwo {
 }
 
 impl Cipher for ArcTwo {
-    const BLOCK_SIZE: usize = 1;
+    const BLOCK_SIZE: usize = 8;
     const KEY_SIZE: usize = ::nettle_sys::ARCTWO_MAX_KEY_SIZE as usize;
-    const RAW_DECRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_arctwo_decrypt;
-    const RAW_ENCRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_arctwo_encrypt;
 
     fn with_encrypt_key(key: &[u8]) -> ArcTwo {
         ArcTwo::with_key(key)
@@ -66,7 +64,15 @@ impl Cipher for ArcTwo {
     }
 
     fn context(&mut self) -> *mut c_void {
-        self.context.as_mut_ptr()
+        ((&mut self.context) as *mut arctwo_ctx) as *mut c_void
+    }
+
+    fn raw_encrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_arctwo_encrypt)
+    }
+
+    fn raw_decrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_arctwo_decrypt)
     }
 }
 

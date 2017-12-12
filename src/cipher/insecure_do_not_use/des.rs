@@ -47,8 +47,6 @@ impl Des {
 impl Cipher for Des {
     const BLOCK_SIZE: usize = ::nettle_sys::DES_BLOCK_SIZE as usize;
     const KEY_SIZE: usize = ::nettle_sys::DES_KEY_SIZE as usize;
-    const RAW_DECRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_des_decrypt;
-    const RAW_ENCRYPT_FUNCTION_POINTER: RawCipherFunctionPointer = ::nettle_sys::nettle_des_encrypt;
 
     fn with_encrypt_key(key: &[u8]) -> Des {
         Des::with_key(key)
@@ -73,7 +71,15 @@ impl Cipher for Des {
     }
 
     fn context(&mut self) -> *mut c_void {
-        self.context.as_mut_ptr()
+        ((&mut self.context) as *mut des_ctx) as *mut c_void
+    }
+
+    fn raw_encrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_des_encrypt)
+    }
+
+    fn raw_decrypt_function() -> RawCipherFunctionPointer {
+        RawCipherFunctionPointer::new(nettle_des_decrypt)
     }
 }
 
