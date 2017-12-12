@@ -1,31 +1,35 @@
 use nettle_sys::{
-    nettle_cbc_encrypt,
-    nettle_cbc_decrypt,
+    nettle_ctr_crypt,
 };
 use Cipher;
+use Mode;
 
-pub struct Cbc<C: Cipher> {
+pub struct Ctr<C: Cipher> {
     cipher: C,
 }
 
-impl<C: Cipher> Cbc<C> {
-    pub fn with_cipher(c: C) -> Self {
-        Cbc{ cipher: c }
+impl<C: Cipher> Mode<C> for Ctr<C> {
+    fn with_encrypt_key(key: &[u8]) -> Self {
+        Ctr{ cipher: C::with_encrypt_key(key) }
     }
 
-    pub fn encrypt(&mut self, iv: &mut [u8], dst: &mut [u8], src: &[u8]) {
+    fn with_decrypt_key(key: &[u8]) -> Self {
+        Ctr{ cipher: C::with_encrypt_key(key) }
+    }
+
+    fn encrypt(&mut self, iv: &mut [u8], dst: &mut [u8], src: &[u8]) {
         assert_eq!(dst.len(), src.len());
         unsafe {
             let ptr = C::raw_encrypt_function();
-            nettle_cbc_encrypt(self.cipher.context(), ptr.ptr(), C::BLOCK_SIZE, iv.as_mut_ptr(), dst.len(), dst.as_mut_ptr(), src.as_ptr());
+            nettle_ctr_crypt(self.cipher.context(), ptr.ptr(), C::BLOCK_SIZE, iv.as_mut_ptr(), dst.len(), dst.as_mut_ptr(), src.as_ptr());
         }
     }
 
-    pub fn decrypt(&mut self, iv: &mut [u8], dst: &mut [u8], src: &[u8]) {
+    fn decrypt(&mut self, iv: &mut [u8], dst: &mut [u8], src: &[u8]) {
         assert_eq!(dst.len(), src.len());
         unsafe {
-            let ptr = C::raw_decrypt_function();
-            nettle_cbc_decrypt(self.cipher.context(), ptr.ptr(), C::BLOCK_SIZE, iv.as_mut_ptr(), dst.len(), dst.as_mut_ptr(), src.as_ptr());
+            let ptr = C::raw_encrypt_function();
+            nettle_ctr_crypt(self.cipher.context(), ptr.ptr(), C::BLOCK_SIZE, iv.as_mut_ptr(), dst.len(), dst.as_mut_ptr(), src.as_ptr());
         }
     }
 }
@@ -35,12 +39,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn round_trip_cbc_twofish() {
+    fn round_trip_ctr_twofish() {
         use cipher::Twofish;
-        let enc = Twofish::with_encrypt_key(&vec![0; Twofish::KEY_SIZE]);
-        let dec = Twofish::with_decrypt_key(&vec![0; Twofish::KEY_SIZE]);
-        let mut enc = Cbc::with_cipher(enc);
-        let mut dec = Cbc::with_cipher(dec);
+        let mut enc = Ctr::<Twofish>::with_encrypt_key(&vec![0; Twofish::KEY_SIZE]);
+        let mut dec = Ctr::<Twofish>::with_encrypt_key(&vec![0; Twofish::KEY_SIZE]);
         let input = vec![1u8; Twofish::BLOCK_SIZE * 10];
         let mut tmp = vec![2u8; Twofish::BLOCK_SIZE * 10];
         let mut output = vec![3u8; Twofish::BLOCK_SIZE * 10];
@@ -54,12 +56,10 @@ mod tests {
     }
 
     #[test]
-    fn round_trip_cbc_serpent() {
+    fn round_trip_ctr_serpent() {
         use cipher::Serpent;
-        let enc = Serpent::with_encrypt_key(&vec![0; Serpent::KEY_SIZE]);
-        let dec = Serpent::with_decrypt_key(&vec![0; Serpent::KEY_SIZE]);
-        let mut enc = Cbc::with_cipher(enc);
-        let mut dec = Cbc::with_cipher(dec);
+        let mut enc = Ctr::<Serpent>::with_encrypt_key(&vec![0; Serpent::KEY_SIZE]);
+        let mut dec = Ctr::<Serpent>::with_encrypt_key(&vec![0; Serpent::KEY_SIZE]);
         let input = vec![1u8; Serpent::BLOCK_SIZE * 10];
         let mut tmp = vec![2u8; Serpent::BLOCK_SIZE * 10];
         let mut output = vec![3u8; Serpent::BLOCK_SIZE * 10];
@@ -73,12 +73,10 @@ mod tests {
     }
 
     #[test]
-    fn round_trip_cbc_des3() {
+    fn round_trip_ctr_des3() {
         use cipher::Des3;
-        let enc = Des3::with_encrypt_key(&vec![0; Des3::KEY_SIZE]);
-        let dec = Des3::with_decrypt_key(&vec![0; Des3::KEY_SIZE]);
-        let mut enc = Cbc::with_cipher(enc);
-        let mut dec = Cbc::with_cipher(dec);
+        let mut enc = Ctr::<Des3>::with_encrypt_key(&vec![0; Des3::KEY_SIZE]);
+        let mut dec = Ctr::<Des3>::with_encrypt_key(&vec![0; Des3::KEY_SIZE]);
         let input = vec![1u8; Des3::BLOCK_SIZE * 10];
         let mut tmp = vec![2u8; Des3::BLOCK_SIZE * 10];
         let mut output = vec![3u8; Des3::BLOCK_SIZE * 10];
@@ -92,12 +90,10 @@ mod tests {
     }
 
     #[test]
-    fn round_trip_cbc_cast128() {
+    fn round_trip_ctr_cast128() {
         use cipher::Cast128;
-        let enc = Cast128::with_encrypt_key(&vec![0; Cast128::KEY_SIZE]);
-        let dec = Cast128::with_decrypt_key(&vec![0; Cast128::KEY_SIZE]);
-        let mut enc = Cbc::with_cipher(enc);
-        let mut dec = Cbc::with_cipher(dec);
+        let mut enc = Ctr::<Cast128>::with_encrypt_key(&vec![0; Cast128::KEY_SIZE]);
+        let mut dec = Ctr::<Cast128>::with_encrypt_key(&vec![0; Cast128::KEY_SIZE]);
         let input = vec![1u8; Cast128::BLOCK_SIZE * 10];
         let mut tmp = vec![2u8; Cast128::BLOCK_SIZE * 10];
         let mut output = vec![3u8; Cast128::BLOCK_SIZE * 10];
@@ -111,12 +107,10 @@ mod tests {
     }
 
     #[test]
-    fn round_trip_cbc_camellia128() {
+    fn round_trip_ctr_camellia128() {
         use cipher::Camellia128;
-        let enc = Camellia128::with_encrypt_key(&vec![0; Camellia128::KEY_SIZE]);
-        let dec = Camellia128::with_decrypt_key(&vec![0; Camellia128::KEY_SIZE]);
-        let mut enc = Cbc::with_cipher(enc);
-        let mut dec = Cbc::with_cipher(dec);
+        let mut enc = Ctr::<Camellia128>::with_encrypt_key(&vec![0; Camellia128::KEY_SIZE]);
+        let mut dec = Ctr::<Camellia128>::with_encrypt_key(&vec![0; Camellia128::KEY_SIZE]);
         let input = vec![1u8; Camellia128::BLOCK_SIZE * 10];
         let mut tmp = vec![2u8; Camellia128::BLOCK_SIZE * 10];
         let mut output = vec![3u8; Camellia128::BLOCK_SIZE * 10];
@@ -130,12 +124,10 @@ mod tests {
     }
 
     #[test]
-    fn round_trip_cbc_camellia192() {
+    fn round_trip_ctr_camellia192() {
         use cipher::Camellia192;
-        let enc = Camellia192::with_encrypt_key(&vec![0; Camellia192::KEY_SIZE]);
-        let dec = Camellia192::with_decrypt_key(&vec![0; Camellia192::KEY_SIZE]);
-        let mut enc = Cbc::with_cipher(enc);
-        let mut dec = Cbc::with_cipher(dec);
+        let mut enc = Ctr::<Camellia192>::with_encrypt_key(&vec![0; Camellia192::KEY_SIZE]);
+        let mut dec = Ctr::<Camellia192>::with_encrypt_key(&vec![0; Camellia192::KEY_SIZE]);
         let input = vec![1u8; Camellia192::BLOCK_SIZE * 10];
         let mut tmp = vec![2u8; Camellia192::BLOCK_SIZE * 10];
         let mut output = vec![3u8; Camellia192::BLOCK_SIZE * 10];
@@ -149,12 +141,10 @@ mod tests {
     }
 
     #[test]
-    fn round_trip_cbc_camellia256() {
+    fn round_trip_ctr_camellia256() {
         use cipher::Camellia256;
-        let enc = Camellia256::with_encrypt_key(&vec![0; Camellia256::KEY_SIZE]);
-        let dec = Camellia256::with_decrypt_key(&vec![0; Camellia256::KEY_SIZE]);
-        let mut enc = Cbc::with_cipher(enc);
-        let mut dec = Cbc::with_cipher(dec);
+        let mut enc = Ctr::<Camellia256>::with_encrypt_key(&vec![0; Camellia256::KEY_SIZE]);
+        let mut dec = Ctr::<Camellia256>::with_encrypt_key(&vec![0; Camellia256::KEY_SIZE]);
         let input = vec![1u8; Camellia256::BLOCK_SIZE * 10];
         let mut tmp = vec![2u8; Camellia256::BLOCK_SIZE * 10];
         let mut output = vec![3u8; Camellia256::BLOCK_SIZE * 10];
@@ -168,12 +158,10 @@ mod tests {
     }
 
     #[test]
-    fn round_trip_cbc_blowfish() {
+    fn round_trip_ctr_blowfish() {
         use cipher::Blowfish;
-        let enc = Blowfish::with_encrypt_key(&vec![0; Blowfish::KEY_SIZE]);
-        let dec = Blowfish::with_decrypt_key(&vec![0; Blowfish::KEY_SIZE]);
-        let mut enc = Cbc::with_cipher(enc);
-        let mut dec = Cbc::with_cipher(dec);
+        let mut enc = Ctr::<Blowfish>::with_encrypt_key(&vec![0; Blowfish::KEY_SIZE]);
+        let mut dec = Ctr::<Blowfish>::with_encrypt_key(&vec![0; Blowfish::KEY_SIZE]);
         let input = vec![1u8; Blowfish::BLOCK_SIZE * 10];
         let mut tmp = vec![2u8; Blowfish::BLOCK_SIZE * 10];
         let mut output = vec![3u8; Blowfish::BLOCK_SIZE * 10];
@@ -187,12 +175,10 @@ mod tests {
     }
 
     #[test]
-    fn round_trip_cbc_aes128() {
+    fn round_trip_ctr_aes128() {
         use cipher::Aes128;
-        let enc = Aes128::with_encrypt_key(&vec![0; Aes128::KEY_SIZE]);
-        let dec = Aes128::with_decrypt_key(&vec![0; Aes128::KEY_SIZE]);
-        let mut enc = Cbc::with_cipher(enc);
-        let mut dec = Cbc::with_cipher(dec);
+        let mut enc = Ctr::<Aes128>::with_encrypt_key(&vec![0; Aes128::KEY_SIZE]);
+        let mut dec = Ctr::<Aes128>::with_encrypt_key(&vec![0; Aes128::KEY_SIZE]);
         let input = vec![1u8; Aes128::BLOCK_SIZE * 10];
         let mut tmp = vec![2u8; Aes128::BLOCK_SIZE * 10];
         let mut output = vec![3u8; Aes128::BLOCK_SIZE * 10];
@@ -206,12 +192,10 @@ mod tests {
     }
 
     #[test]
-    fn round_trip_cbc_aes192() {
+    fn round_trip_ctr_aes192() {
         use cipher::Aes192;
-        let enc = Aes192::with_encrypt_key(&vec![0; Aes192::KEY_SIZE]);
-        let dec = Aes192::with_decrypt_key(&vec![0; Aes192::KEY_SIZE]);
-        let mut enc = Cbc::with_cipher(enc);
-        let mut dec = Cbc::with_cipher(dec);
+        let mut enc = Ctr::<Aes192>::with_encrypt_key(&vec![0; Aes192::KEY_SIZE]);
+        let mut dec = Ctr::<Aes192>::with_encrypt_key(&vec![0; Aes192::KEY_SIZE]);
         let input = vec![1u8; Aes192::BLOCK_SIZE * 10];
         let mut tmp = vec![2u8; Aes192::BLOCK_SIZE * 10];
         let mut output = vec![3u8; Aes192::BLOCK_SIZE * 10];
@@ -225,12 +209,10 @@ mod tests {
     }
 
     #[test]
-    fn round_trip_cbc_aes256() {
+    fn round_trip_ctr_aes256() {
         use cipher::Aes256;
-        let enc = Aes256::with_encrypt_key(&vec![0; Aes256::KEY_SIZE]);
-        let dec = Aes256::with_decrypt_key(&vec![0; Aes256::KEY_SIZE]);
-        let mut enc = Cbc::with_cipher(enc);
-        let mut dec = Cbc::with_cipher(dec);
+        let mut enc = Ctr::<Aes256>::with_encrypt_key(&vec![0; Aes256::KEY_SIZE]);
+        let mut dec = Ctr::<Aes256>::with_encrypt_key(&vec![0; Aes256::KEY_SIZE]);
         let input = vec![1u8; Aes256::BLOCK_SIZE * 10];
         let mut tmp = vec![2u8; Aes256::BLOCK_SIZE * 10];
         let mut output = vec![3u8; Aes256::BLOCK_SIZE * 10];
@@ -244,12 +226,10 @@ mod tests {
     }
 
     #[test]
-    fn round_trip_cbc_des() {
+    fn round_trip_ctr_des() {
         use cipher::insecure_do_not_use::Des;
-        let enc = Des::with_encrypt_key(&vec![0; Des::KEY_SIZE]);
-        let dec = Des::with_decrypt_key(&vec![0; Des::KEY_SIZE]);
-        let mut enc = Cbc::with_cipher(enc);
-        let mut dec = Cbc::with_cipher(dec);
+        let mut enc = Ctr::<Des>::with_encrypt_key(&vec![0; Des::KEY_SIZE]);
+        let mut dec = Ctr::<Des>::with_encrypt_key(&vec![0; Des::KEY_SIZE]);
         let input = vec![1u8; Des::BLOCK_SIZE * 10];
         let mut tmp = vec![2u8; Des::BLOCK_SIZE * 10];
         let mut output = vec![3u8; Des::BLOCK_SIZE * 10];
@@ -263,12 +243,10 @@ mod tests {
     }
 
     #[test]
-    fn round_trip_cbc_arctwo() {
+    fn round_trip_ctr_arctwo() {
         use cipher::insecure_do_not_use::ArcTwo;
-        let enc = ArcTwo::with_encrypt_key(&vec![0; ArcTwo::KEY_SIZE]);
-        let dec = ArcTwo::with_decrypt_key(&vec![0; ArcTwo::KEY_SIZE]);
-        let mut enc = Cbc::with_cipher(enc);
-        let mut dec = Cbc::with_cipher(dec);
+        let mut enc = Ctr::<ArcTwo>::with_encrypt_key(&vec![0; ArcTwo::KEY_SIZE]);
+        let mut dec = Ctr::<ArcTwo>::with_encrypt_key(&vec![0; ArcTwo::KEY_SIZE]);
         let input = vec![1u8; ArcTwo::BLOCK_SIZE * 10];
         let mut tmp = vec![2u8; ArcTwo::BLOCK_SIZE * 10];
         let mut output = vec![3u8; ArcTwo::BLOCK_SIZE * 10];
@@ -282,12 +260,10 @@ mod tests {
     }
 
     #[test]
-    fn round_trip_cbc_arcfour() {
+    fn round_trip_ctr_arcfour() {
         use cipher::insecure_do_not_use::ArcFour;
-        let enc = ArcFour::with_encrypt_key(&vec![0; ArcFour::KEY_SIZE]);
-        let dec = ArcFour::with_decrypt_key(&vec![0; ArcFour::KEY_SIZE]);
-        let mut enc = Cbc::with_cipher(enc);
-        let mut dec = Cbc::with_cipher(dec);
+        let mut enc = Ctr::<ArcFour>::with_encrypt_key(&vec![0; ArcFour::KEY_SIZE]);
+        let mut dec = Ctr::<ArcFour>::with_encrypt_key(&vec![0; ArcFour::KEY_SIZE]);
         let input = vec![1u8; ArcFour::BLOCK_SIZE * 10];
         let mut tmp = vec![2u8; ArcFour::BLOCK_SIZE * 10];
         let mut output = vec![3u8; ArcFour::BLOCK_SIZE * 10];
