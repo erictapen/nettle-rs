@@ -12,3 +12,9 @@ pub use cipher::{
 
 mod cbc;
 pub use cbc::Cbc;
+
+mod ctr;
+pub use ctr::Ctr;
+
+mod cfb;
+pub use cfb::Cfb;
