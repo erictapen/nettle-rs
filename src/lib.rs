@@ -14,3 +14,8 @@ pub mod mode;
 pub use mode::{
     Mode,
 };
+
+pub mod aead;
+pub use aead::{
+    Aead
+};
