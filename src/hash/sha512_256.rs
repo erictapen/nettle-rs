@@ -3,6 +3,8 @@ use nettle_sys::{
     nettle_sha512_256_init,
     nettle_sha512_256_digest,
     nettle_sha512_update,
+    nettle_hash,
+    nettle_sha512_256,
 };
 use std::default::Default;
 use std::mem::zeroed;
@@ -26,6 +28,7 @@ impl Default for Sha512_256 {
 }
 
 impl Hash for Sha512_256 {
+    type Context = sha512_ctx;
     const DIGEST_SIZE: usize = ::nettle_sys::SHA512_256_DIGEST_SIZE as usize;
 
     fn update(&mut self, data: &[u8]) {
@@ -39,6 +42,8 @@ impl Hash for Sha512_256 {
             nettle_sha512_256_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
     }
+
+    unsafe fn nettle_hash() -> &'static nettle_hash { &nettle_sha512_256 }
 }
 
 #[cfg(test)]

@@ -3,6 +3,8 @@ use nettle_sys::{
     nettle_md4_init,
     nettle_md4_digest,
     nettle_md4_update,
+    nettle_hash,
+    nettle_md4,
 };
 use std::default::Default;
 use std::mem::zeroed;
@@ -27,6 +29,7 @@ impl Default for Md4 {
 }
 
 impl Hash for Md4 {
+    type Context = md4_ctx;
     const DIGEST_SIZE: usize = ::nettle_sys::MD4_DIGEST_SIZE as usize;
 
     fn update(&mut self, data: &[u8]) {
@@ -40,6 +43,8 @@ impl Hash for Md4 {
             nettle_md4_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
     }
+
+    unsafe fn nettle_hash() -> &'static nettle_hash { &nettle_md4 }
 }
 
 #[cfg(test)]

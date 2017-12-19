@@ -19,3 +19,9 @@ pub mod aead;
 pub use aead::{
     Aead
 };
+
+pub mod mac;
+pub use mac::{
+    Mac,
+};
+mod hmac;

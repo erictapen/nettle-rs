@@ -3,6 +3,9 @@ use nettle_sys::{
     nettle_ripemd160_init,
     nettle_ripemd160_digest,
     nettle_ripemd160_update,
+    nettle_hash,
+    nettle_ripemd160,
+    RIPEMD160_DIGEST_SIZE,
 };
 use std::default::Default;
 use std::mem::zeroed;
@@ -28,7 +31,8 @@ impl Default for Ripemd160 {
 }
 
 impl Hash for Ripemd160 {
-    const DIGEST_SIZE: usize = ::nettle_sys::RIPEMD160_DIGEST_SIZE as usize;
+    type Context = ripemd160_ctx;
+    const DIGEST_SIZE: usize = RIPEMD160_DIGEST_SIZE as usize;
 
     fn update(&mut self, data: &[u8]) {
         unsafe {
@@ -41,6 +45,8 @@ impl Hash for Ripemd160 {
             nettle_ripemd160_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
     }
+
+    unsafe fn nettle_hash() -> &'static nettle_hash { &nettle_ripemd160 }
 }
 
 #[cfg(test)]
