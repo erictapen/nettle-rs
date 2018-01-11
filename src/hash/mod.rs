@@ -3,7 +3,7 @@
 pub mod insecure_do_not_use;
 
 mod hash;
-pub use self::hash::Hash;
+pub use self::hash::{NettleHash,Hash};
 
 mod sha224;
 pub use self::sha224::Sha224;

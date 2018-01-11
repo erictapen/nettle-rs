@@ -24,4 +24,4 @@ pub mod mac;
 pub use mac::{
     Mac,
 };
-mod hmac;
+pub mod hmac;

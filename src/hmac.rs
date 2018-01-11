@@ -4,15 +4,16 @@ use nettle_sys::{
     nettle_hmac_digest,
 };
 use {Hash,Mac};
+use hash::NettleHash;
 use std::mem::zeroed;
 
-pub struct Hmac<H: Hash> {
+pub struct Hmac<H: Hash + NettleHash> {
     inner: H::Context,
     outer: H::Context,
     state: H::Context,
 }
 
-impl<H: Hash> Hmac<H> {
+impl<H: NettleHash> Hmac<H> {
     pub fn with_key(key: &[u8]) -> Self {
         unsafe {
             let mut ret: Hmac<H> = zeroed();
@@ -29,7 +30,11 @@ impl<H: Hash> Hmac<H> {
     }
 }
 
-impl<H: Hash> Mac for Hmac<H> {
+impl<H: NettleHash> Mac for Hmac<H> {
+    fn mac_size(&self) -> usize {
+        H::default().digest_size()
+    }
+
     fn update(&mut self, data: &[u8]) {
         unsafe {
             nettle_hmac_update(

@@ -9,6 +9,7 @@ use nettle_sys::{
 use std::default::Default;
 use std::mem::zeroed;
 use Hash;
+use hash::NettleHash;
 
 #[allow(non_camel_case_types)]
 /// 512 bit variant of the Secure Hash Algorithm 3 (SHA-3) defined in FIPS 202.
@@ -27,8 +28,7 @@ impl Default for Sha3_512 {
 }
 
 impl Hash for Sha3_512 {
-    type Context = sha3_512_ctx;
-    const DIGEST_SIZE: usize = ::nettle_sys::SHA3_512_DIGEST_SIZE as usize;
+    fn digest_size(&self) -> usize { ::nettle_sys::SHA3_512_DIGEST_SIZE as usize }
 
     fn update(&mut self, data: &[u8]) {
         unsafe {
@@ -41,6 +41,10 @@ impl Hash for Sha3_512 {
             nettle_sha3_512_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
     }
+}
+
+impl NettleHash for Sha3_512 {
+    type Context = sha3_512_ctx;
 
     unsafe fn nettle_hash() -> &'static nettle_hash { &nettle_sha3_512 }
 }
@@ -60,8 +64,8 @@ mod tests {
     //  Generated on Thu Jan 28 13:32:47 2016
     #[test]
     fn nist_cavs_short_msg() {
-        let mut digest = vec![0u8; Sha3_512::DIGEST_SIZE];
         let mut ctx = Sha3_512::default();
+        let mut digest = vec![0u8; ctx.digest_size()];
 
         ctx.digest(&mut digest);
         assert_eq!(digest, &b"\xa6\x9f\x73\xcc\xa2\x3a\x9a\xc5\xc8\xb5\x67\xdc\x18\x5a\x75\x6e\x97\xc9\x82\x16\x4f\xe2\x58\x59\xe0\xd1\xdc\xc1\x47\x5c\x80\xa6\x15\xb2\x12\x3a\xf1\xf5\xf9\x4c\x11\xe3\xe9\x40\x2c\x3a\xc5\x58\xf5\x00\x19\x9d\x95\xb6\xd3\xe3\x01\x75\x85\x86\x28\x1d\xcd\x26"[..]);

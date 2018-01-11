@@ -5,10 +5,12 @@ use nettle_sys::{
     nettle_gosthash94_update,
     nettle_hash,
     nettle_gosthash94,
+    GOSTHASH94_DIGEST_SIZE,
 };
 use std::default::Default;
 use std::mem::zeroed;
 use Hash;
+use hash::NettleHash;
 
 /// GOST R 34.11-94 (GOSTHASH94) defined in RFC 5831.
 /// # Note
@@ -29,8 +31,7 @@ impl Default for GostHash94 {
 }
 
 impl Hash for GostHash94 {
-    type Context = gosthash94_ctx;
-    const DIGEST_SIZE: usize = ::nettle_sys::GOSTHASH94_DIGEST_SIZE as usize;
+    fn digest_size(&self) -> usize { GOSTHASH94_DIGEST_SIZE as usize }
 
     fn update(&mut self, data: &[u8]) {
         unsafe {
@@ -43,6 +44,10 @@ impl Hash for GostHash94 {
             nettle_gosthash94_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
     }
+}
+
+impl NettleHash for GostHash94 {
+    type Context = gosthash94_ctx;
 
     unsafe fn nettle_hash() -> &'static nettle_hash { &nettle_gosthash94 }
 }

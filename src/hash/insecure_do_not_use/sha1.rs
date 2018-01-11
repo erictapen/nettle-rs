@@ -10,6 +10,7 @@ use nettle_sys::{
 use std::default::Default;
 use std::mem::zeroed;
 use Hash;
+use hash::NettleHash;
 
 /// Secure Hash Algorithm 1 (SHA-1) defined in FIPS 180-4
 /// # Note
@@ -30,8 +31,7 @@ impl Default for Sha1 {
 }
 
 impl Hash for Sha1 {
-    type Context = sha1_ctx;
-    const DIGEST_SIZE: usize = SHA1_DIGEST_SIZE as usize;
+    fn digest_size(&self) -> usize { SHA1_DIGEST_SIZE as usize }
 
     fn update(&mut self, data: &[u8]) {
         unsafe {
@@ -44,6 +44,10 @@ impl Hash for Sha1 {
             nettle_sha1_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
     }
+}
+
+impl NettleHash for Sha1 {
+    type Context = sha1_ctx;
 
     unsafe fn nettle_hash() -> &'static nettle_hash { &nettle_sha1 }
 }
@@ -63,8 +67,8 @@ mod tests {
     //  Generated on Tue Mar 15 08:23:35 2011
     #[test]
     fn nist_cavs_short_msg() {
-        let mut digest = vec![0u8; Sha1::DIGEST_SIZE];
         let mut ctx = Sha1::default();
+        let mut digest = vec![0u8; ctx.digest_size()];
 
         ctx.digest(&mut digest);
         assert_eq!(digest, b"\xda\x39\xa3\xee\x5e\x6b\x4b\x0d\x32\x55\xbf\xef\x95\x60\x18\x90\xaf\xd8\x07\x09");

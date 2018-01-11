@@ -9,6 +9,7 @@ use nettle_sys::{
 use std::default::Default;
 use std::mem::zeroed;
 use Hash;
+use hash::NettleHash;
 
 #[allow(non_camel_case_types)]
 /// 512 bit variant of the Secure Hash Algorithm 2 (SHA-2) defined in FIPS 180-4, truncated to 256
@@ -28,8 +29,7 @@ impl Default for Sha512_256 {
 }
 
 impl Hash for Sha512_256 {
-    type Context = sha512_ctx;
-    const DIGEST_SIZE: usize = ::nettle_sys::SHA512_256_DIGEST_SIZE as usize;
+    fn digest_size(&self) -> usize { ::nettle_sys::SHA512_256_DIGEST_SIZE as usize }
 
     fn update(&mut self, data: &[u8]) {
         unsafe {
@@ -42,6 +42,10 @@ impl Hash for Sha512_256 {
             nettle_sha512_256_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
     }
+}
+
+impl NettleHash for Sha512_256 {
+    type Context = sha512_ctx;
 
     unsafe fn nettle_hash() -> &'static nettle_hash { &nettle_sha512_256 }
 }
@@ -61,8 +65,8 @@ mod tests {
     //  Generated on Mon Jul 10 14:34:21 2017
     #[test]
     fn nist_cavs_short_msg() {
-        let mut digest = vec![0u8; Sha512_256::DIGEST_SIZE];
         let mut ctx = Sha512_256::default();
+        let mut digest = vec![0u8; ctx.digest_size()];
 
         ctx.digest(&mut digest);
         assert_eq!(digest, &b"\xc6\x72\xb8\xd1\xef\x56\xed\x28\xab\x87\xc3\x62\x2c\x51\x14\x06\x9b\xdd\x3a\xd7\xb8\xf9\x73\x74\x98\xd0\xc0\x1e\xce\xf0\x96\x7a"[..]);

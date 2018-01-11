@@ -5,10 +5,12 @@ use nettle_sys::{
     nettle_md2_update,
     nettle_hash,
     nettle_md2,
+    MD2_DIGEST_SIZE,
 };
 use std::default::Default;
 use std::mem::zeroed;
 use Hash;
+use hash::NettleHash;
 
 /// Message-Digest Algorithm 2 (MD2) defined in RFC 1319.
 /// # Note
@@ -29,8 +31,7 @@ impl Default for Md2 {
 }
 
 impl Hash for Md2 {
-    type Context = md2_ctx;
-    const DIGEST_SIZE: usize = ::nettle_sys::MD2_DIGEST_SIZE as usize;
+    fn digest_size(&self) -> usize { MD2_DIGEST_SIZE as usize }
 
     fn update(&mut self, data: &[u8]) {
         unsafe {
@@ -43,6 +44,10 @@ impl Hash for Md2 {
             nettle_md2_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
     }
+}
+
+impl NettleHash for Md2 {
+    type Context = md2_ctx;
 
     unsafe fn nettle_hash() -> &'static nettle_hash { &nettle_md2 }
 }
@@ -58,8 +63,8 @@ mod tests {
 
     #[test]
     fn rfc_1319() {
-        let mut digest = vec![0u8; Md2::DIGEST_SIZE];
         let mut ctx = Md2::default();
+        let mut digest = vec![0u8; ctx.digest_size()];
 
         ctx.digest(&mut digest);
         assert_eq!(digest, b"\x83\x50\xe5\xa3\xe2\x4c\x15\x3d\xf2\x27\x5c\x9f\x80\x69\x27\x73");

@@ -5,10 +5,12 @@ use nettle_sys::{
     nettle_md5_update,
     nettle_hash,
     nettle_md5,
+    MD5_DIGEST_SIZE,
 };
 use std::default::Default;
 use std::mem::zeroed;
 use Hash;
+use hash::NettleHash;
 
 /// Message-Digest Algorithm 5 (MD5) defined in RFC 1321.
 /// # Note
@@ -29,8 +31,7 @@ impl Default for Md5 {
 }
 
 impl Hash for Md5 {
-    type Context = md5_ctx;
-    const DIGEST_SIZE: usize = ::nettle_sys::MD5_DIGEST_SIZE as usize;
+    fn digest_size(&self) -> usize { MD5_DIGEST_SIZE as usize }
 
     fn update(&mut self, data: &[u8]) {
         unsafe {
@@ -43,6 +44,10 @@ impl Hash for Md5 {
             nettle_md5_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
     }
+}
+
+impl NettleHash for Md5 {
+    type Context = md5_ctx;
 
     unsafe fn nettle_hash() -> &'static nettle_hash { &nettle_md5 }
 }
@@ -58,8 +63,8 @@ mod tests {
 
     #[test]
     fn rfc_1321() {
-        let mut digest = vec![0u8; Md5::DIGEST_SIZE];
         let mut ctx = Md5::default();
+        let mut digest = vec![0u8; ctx.digest_size()];
 
         ctx.digest(&mut digest);
         assert_eq!(digest, b"\xd4\x1d\x8c\xd9\x8f\x00\xb2\x04\xe9\x80\x09\x98\xec\xf8\x42\x7e");

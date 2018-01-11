@@ -5,10 +5,12 @@ use nettle_sys::{
     nettle_md4_update,
     nettle_hash,
     nettle_md4,
+    MD4_DIGEST_SIZE,
 };
 use std::default::Default;
 use std::mem::zeroed;
 use Hash;
+use hash::NettleHash;
 
 /// Message-Digest Algorithm 4 (MD4) defined in RFC 1320.
 /// # Note
@@ -29,8 +31,7 @@ impl Default for Md4 {
 }
 
 impl Hash for Md4 {
-    type Context = md4_ctx;
-    const DIGEST_SIZE: usize = ::nettle_sys::MD4_DIGEST_SIZE as usize;
+    fn digest_size(&self) -> usize { MD4_DIGEST_SIZE as usize }
 
     fn update(&mut self, data: &[u8]) {
         unsafe {
@@ -43,6 +44,10 @@ impl Hash for Md4 {
             nettle_md4_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
     }
+}
+
+impl NettleHash for Md4 {
+    type Context = md4_ctx;
 
     unsafe fn nettle_hash() -> &'static nettle_hash { &nettle_md4 }
 }
@@ -58,8 +63,8 @@ mod tests {
 
     #[test]
     fn rfc_1320() {
-        let mut digest = vec![0u8; Md4::DIGEST_SIZE];
         let mut ctx = Md4::default();
+        let mut digest = vec![0u8; ctx.digest_size()];
 
         ctx.digest(&mut digest);
         assert_eq!(digest, b"\x31\xd6\xcf\xe0\xd1\x6a\xe9\x31\xb7\x3c\x59\xd7\xe0\xc0\x89\xc0");

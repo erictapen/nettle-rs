@@ -10,7 +10,7 @@ use nettle_sys::{
 use std::default::Default;
 use std::mem::zeroed;
 use Hash;
-
+use hash::NettleHash;
 
 /// RIPEMD-160 defined in ISO/IEC 10118-3:1998.
 /// # Note
@@ -31,8 +31,7 @@ impl Default for Ripemd160 {
 }
 
 impl Hash for Ripemd160 {
-    type Context = ripemd160_ctx;
-    const DIGEST_SIZE: usize = RIPEMD160_DIGEST_SIZE as usize;
+    fn digest_size(&self) -> usize { RIPEMD160_DIGEST_SIZE as usize }
 
     fn update(&mut self, data: &[u8]) {
         unsafe {
@@ -45,6 +44,10 @@ impl Hash for Ripemd160 {
             nettle_ripemd160_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
     }
+}
+
+impl NettleHash for Ripemd160 {
+    type Context = ripemd160_ctx;
 
     unsafe fn nettle_hash() -> &'static nettle_hash { &nettle_ripemd160 }
 }
@@ -60,8 +63,8 @@ mod tests {
 
     #[test]
     fn bosselaers_test_vectors() {
-        let mut digest = vec![0u8; Ripemd160::DIGEST_SIZE];
         let mut ctx = Ripemd160::default();
+        let mut digest = vec![0u8; ctx.digest_size()];
 
         ctx.digest(&mut digest);
         assert_eq!(digest, b"\x9c\x11\x85\xa5\xc5\xe9\xfc\x54\x61\x28\x08\x97\x7e\xe8\xf5\x48\xb2\x25\x8d\x31");
