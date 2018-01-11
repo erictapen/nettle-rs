@@ -24,4 +24,3 @@ pub mod mac;
 pub use mac::{
     Mac,
 };
-pub mod hmac;

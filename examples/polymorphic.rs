@@ -3,7 +3,7 @@ extern crate rand;
 
 use nettle::hash::{Hash,Sha224,Sha256};
 use nettle::Mac;
-use nettle::hmac::Hmac;
+use nettle::mac::Hmac;
 
 struct Fubar {
     foo: Foo,
@@ -57,7 +57,11 @@ impl Fubar {
     }
 
     fn init_mac(&self) -> Box<Mac> {
-        Box::new(Hmac::<Sha224>::with_key(&b"123"[..]))
+        if rand::random::<bool>() {
+            Box::new(Hmac::<Sha224>::with_key(&b"123"[..]))
+        } else {
+            Box::new(Hmac::<Sha256>::with_key(&b"123"[..]))
+        }
     }
 }
 
