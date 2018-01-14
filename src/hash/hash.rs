@@ -24,6 +24,20 @@ pub trait NettleHash: Hash + Default {
     unsafe fn nettle_hash() -> &'static nettle_hash;
 }
 
+impl Hash for Box<Hash> {
+    fn digest_size(&self) -> usize {
+        self.as_ref().digest_size()
+    }
+
+    fn update(&mut self, data: &[u8]){
+        self.as_mut().update(data)
+    }
+
+    fn digest(&mut self, digest: &mut [u8]) {
+        self.as_mut().digest(digest)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
