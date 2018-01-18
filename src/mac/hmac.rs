@@ -5,11 +5,14 @@ use nettle_sys::{
 };
 use {Hash,Mac};
 use hash::NettleHash;
-use std::mem::zeroed;
+use std::mem::{transmute,zeroed};
+use std::os::raw::c_void;
+use std::slice;
+use libc::size_t;
 
 pub struct Hmac<H: Hash + NettleHash> {
-    inner: H::Context,
     outer: H::Context,
+    inner: H::Context,
     state: H::Context,
 }
 
@@ -26,6 +29,24 @@ impl<H: NettleHash> Hmac<H> {
                 key.len(),
                 key.as_ptr());
             ret
+        }
+    }
+
+    pub extern "C" fn nettle_update(ctx: *mut c_void, length: size_t, src: *const u8) {
+        unsafe {
+            let ctx: &mut Hmac<H> = transmute(ctx);
+            let src = slice::from_raw_parts(src,length);
+
+            ctx.update(src);
+        }
+    }
+
+    pub extern "C" fn nettle_digest(ctx: *mut c_void, length: size_t, dst: *mut u8) {
+        unsafe {
+            let ctx: &mut Hmac<H> = transmute(ctx);
+            let src = slice::from_raw_parts_mut(dst,length);
+
+            ctx.digest(src);
         }
     }
 }

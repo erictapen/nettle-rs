@@ -1,4 +1,5 @@
 extern crate nettle_sys;
+extern crate libc;
 
 pub mod hash;
 pub use hash::{
@@ -24,3 +25,5 @@ pub mod mac;
 pub use mac::{
     Mac,
 };
+
+pub mod kdf;
