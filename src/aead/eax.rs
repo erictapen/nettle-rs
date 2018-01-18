@@ -19,6 +19,8 @@ pub struct Eax<C: Cipher> {
 }
 
 impl<C: Cipher> Eax<C> {
+    pub const DIGEST_SIZE: usize = ::nettle_sys::EAX_DIGEST_SIZE as usize;
+
     pub fn with_key_and_nonce(key: &[u8], nonce: &[u8]) -> Self {
         assert_eq!(C::BLOCK_SIZE, 16);
 
@@ -41,8 +43,10 @@ impl<C: Cipher> Eax<C> {
     }
 }
 
-impl<C: Cipher> Aead<C> for Eax<C> {
-    const DIGEST_SIZE: usize = ::nettle_sys::EAX_DIGEST_SIZE as usize;
+impl<C: Cipher> Aead for Eax<C> {
+    fn digest_size(&self) -> usize {
+        ::nettle_sys::EAX_DIGEST_SIZE as usize
+    }
 
     fn update(&mut self, ad: &[u8]) {
         unsafe {

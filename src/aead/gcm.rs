@@ -19,6 +19,8 @@ pub struct Gcm<C: Cipher> {
 }
 
 impl<C: Cipher> Gcm<C> {
+    pub const DIGEST_SIZE: usize = ::nettle_sys::GCM_DIGEST_SIZE as usize;
+
     pub fn with_key_and_nonce(key: &[u8], nonce: &[u8]) -> Self {
         assert_eq!(C::BLOCK_SIZE, 16);
 
@@ -41,8 +43,10 @@ impl<C: Cipher> Gcm<C> {
     }
 }
 
-impl<C: Cipher> Aead<C> for Gcm<C> {
-    const DIGEST_SIZE: usize = ::nettle_sys::GCM_DIGEST_SIZE as usize;
+impl<C: Cipher> Aead for Gcm<C> {
+    fn digest_size(&self) -> usize {
+        ::nettle_sys::GCM_DIGEST_SIZE as usize
+    }
 
     fn update(&mut self, ad: &[u8]) {
         unsafe {

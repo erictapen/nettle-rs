@@ -4,6 +4,11 @@ extern crate rand;
 use nettle::hash::{Hash,Sha224,Sha256};
 use nettle::Mac;
 use nettle::mac::Hmac;
+use nettle::Mode;
+use nettle::cipher::{Aes128,Twofish};
+use nettle::mode::{Cfb,Cbc};
+use nettle::Aead;
+use nettle::aead::{Gcm,Eax};
 
 struct Fubar {
     foo: Foo,
@@ -61,6 +66,22 @@ impl Fubar {
             Box::new(Hmac::<Sha224>::with_key(&b"123"[..]))
         } else {
             Box::new(Hmac::<Sha256>::with_key(&b"123"[..]))
+        }
+    }
+
+    fn init_cipher(&self) -> Box<Mode> {
+        if rand::random::<bool>() {
+            Box::new(Cbc::<Aes128>::with_encrypt_key(&b"123"[..]))
+        } else {
+            Box::new(Cfb::<Twofish>::with_encrypt_key(&b"123"[..]))
+        }
+    }
+
+    fn init_aead(&self) -> Box<Aead> {
+        if rand::random::<bool>() {
+            Box::new(Gcm::<Aes128>::with_key_and_nonce(&b"123"[..],&b"123"[..]))
+        } else {
+            Box::new(Eax::<Twofish>::with_key_and_nonce(&b"123"[..],&b"123"[..]))
         }
     }
 }
@@ -143,6 +164,9 @@ impl Baz {
 
 fn main() {
     let fubar = Fubar::default();
+
+    fubar.init_aead();
+    fubar.init_cipher();
 
     println!("Fubar hash: {:?}",fubar.produce_hash());
     println!("Fubar mac: {:?}",fubar.produce_mac());

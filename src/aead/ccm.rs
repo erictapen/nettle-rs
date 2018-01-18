@@ -16,6 +16,8 @@ pub struct Ccm<C: Cipher> {
 }
 
 impl<C: Cipher> Ccm<C> {
+    pub const DIGEST_SIZE: usize = ::nettle_sys::CCM_DIGEST_SIZE as usize;
+
     pub fn with_key_and_nonce(key: &[u8], nonce: &[u8], ad_len: usize, msg_len: usize, digest_len: usize) -> Self {
         assert_eq!(C::BLOCK_SIZE, 16);
 
@@ -43,8 +45,10 @@ impl<C: Cipher> Ccm<C> {
     }
 }
 
-impl<C: Cipher> Aead<C> for Ccm<C> {
-    const DIGEST_SIZE: usize = ::nettle_sys::CCM_DIGEST_SIZE as usize;
+impl<C: Cipher> Aead for Ccm<C> {
+    fn digest_size(&self) -> usize {
+        ::nettle_sys::CCM_DIGEST_SIZE as usize
+    }
 
     fn update(&mut self, ad: &[u8]) {
         unsafe {

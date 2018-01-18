@@ -8,15 +8,17 @@ pub struct Ctr<C: Cipher> {
     cipher: C,
 }
 
-impl<C: Cipher> Mode<C> for Ctr<C> {
-    fn with_encrypt_key(key: &[u8]) -> Self {
+impl<C: Cipher> Ctr<C> {
+    pub fn with_encrypt_key(key: &[u8]) -> Self {
         Ctr{ cipher: C::with_encrypt_key(key) }
     }
 
-    fn with_decrypt_key(key: &[u8]) -> Self {
+    pub fn with_decrypt_key(key: &[u8]) -> Self {
         Ctr{ cipher: C::with_encrypt_key(key) }
     }
+}
 
+impl<C: Cipher> Mode for Ctr<C> {
     fn encrypt(&mut self, iv: &mut [u8], dst: &mut [u8], src: &[u8]) {
         assert_eq!(dst.len(), src.len());
         unsafe {
