@@ -4,8 +4,7 @@ version = "0.1.0"
 authors = ["Kai Michaelis <kai.michaelis@pep-project.org>"]
 
 [dependencies]
-nettle-sys = "0.1.0"
+nettle-sys = { git = "https://gitlab.com/sequoia-pgp/nettle-sys" }
 libc = "0.2.33"
-
-[dev-dependencies]
+error-chain = "0.11.0"
 rand = "0.4"

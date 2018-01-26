@@ -1,5 +1,13 @@
 extern crate nettle_sys;
 extern crate libc;
+extern crate rand;
+#[macro_use]
+extern crate error_chain;
+
+mod errors {
+    error_chain! { }
+}
+use errors::*;
 
 pub mod hash;
 pub use hash::{
