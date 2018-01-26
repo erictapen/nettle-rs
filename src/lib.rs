@@ -35,3 +35,9 @@ pub use mac::{
 };
 
 pub mod kdf;
+pub mod rsa;
+
+pub mod random;
+pub use random::{
+    Random
+};
