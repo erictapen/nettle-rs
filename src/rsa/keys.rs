@@ -188,4 +188,4 @@ mod tests {
         assert!(generate_keypair(&mut rng,2048).is_ok());
         assert!(generate_keypair(&mut rng,4096).is_ok());
     }
- }
+}

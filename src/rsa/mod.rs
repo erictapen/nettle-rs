@@ -1,7 +1,8 @@
 mod keys;
 pub use self::keys::{
     RsaPrivateKey,
-    RsaPublicKey
+    RsaPublicKey,
+    generate_keypair,
 };
 
 mod pkcs1;
@@ -11,6 +12,8 @@ pub use self::pkcs1::{
     sign_digest_pkcs1,
     verify_pkcs1,
     verify_digest_pkcs1,
+    encrypt_pkcs1,
+    decrypt_pkcs1,
 };
 
 mod pss;
