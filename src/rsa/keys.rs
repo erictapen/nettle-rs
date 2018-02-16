@@ -4,6 +4,7 @@ use ::nettle_sys::{
     nettle_rsa_public_key_init,
     nettle_rsa_public_key_clear,
     nettle_rsa_public_key_prepare,
+    nettle_rsa_generate_keypair,
     rsa_private_key,
     nettle_rsa_private_key_init,
     nettle_rsa_private_key_clear,
@@ -15,9 +16,11 @@ use ::nettle_sys::{
     __gmpz_invert,
 };
 use std::mem::zeroed;
+use Random;
 
 pub struct RsaPublicKey {
     pub(crate) context: rsa_public_key,
+    pub(crate) modulo_bytes: usize,
 }
 
 impl RsaPublicKey {
@@ -29,7 +32,10 @@ impl RsaPublicKey {
             nettle_mpz_set_str_256_u(&mut ctx.e[0] as *mut _, e.len(), e.as_ptr());
             nettle_mpz_set_str_256_u(&mut ctx.n[0] as *mut _, n.len(), n.as_ptr());
 
-            let mut ret = RsaPublicKey{ context: ctx };
+            let mut ret = RsaPublicKey{
+                context: ctx,
+                modulo_bytes: n.len(),
+            };
 
             if nettle_rsa_public_key_prepare(&mut ret.context as *mut _) == 1 {
                 Ok(ret)
@@ -122,6 +128,29 @@ impl Drop for RsaPrivateKey {
     }
 }
 
+pub fn generate_keypair<R: Random>(random: &mut R, modulo_size: u32) -> Result<(RsaPublicKey,RsaPrivateKey)> {
+    use std::ptr;
+
+    let e = [0x01,0x00,0x01];
+
+    unsafe {
+        let mut public_ctx: rsa_public_key = zeroed();
+        let mut private_ctx: rsa_private_key = zeroed();
+
+        nettle_rsa_private_key_init(&mut private_ctx as *mut _);
+        nettle_rsa_public_key_init(&mut public_ctx as *mut _);
+        nettle_mpz_set_str_256_u(&mut public_ctx.e[0] as *mut _, e.len(), e.as_ptr());
+
+        if nettle_rsa_generate_keypair(&mut public_ctx as *mut _,&mut private_ctx as *mut _,random.context(),Some(R::random),ptr::null_mut(),None,modulo_size,0) == 1 {
+            Ok((RsaPublicKey{ context: public_ctx, modulo_bytes: modulo_size as usize / 8 },RsaPrivateKey{ context: private_ctx }))
+        } else {
+            nettle_rsa_public_key_clear(&mut public_ctx as *mut _);
+            nettle_rsa_private_key_clear(&mut private_ctx as *mut _);
+            Err("Key generation failed".into())
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -149,4 +178,14 @@ mod tests {
         assert!(RsaPrivateKey::new_crt(dp,dq,p,q,None).is_ok());
         assert!(RsaPrivateKey::new_crt(dp,dq,p,q,co).is_ok());
     }
-}
+
+    #[test]
+    fn generate_keypairs() {
+        use random::Yarrow;
+
+        let mut rng = Yarrow::default();
+        assert!(generate_keypair(&mut rng,1024).is_ok());
+        assert!(generate_keypair(&mut rng,2048).is_ok());
+        assert!(generate_keypair(&mut rng,4096).is_ok());
+    }
+ }
