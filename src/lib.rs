@@ -43,3 +43,4 @@ pub use random::{
 };
 
 pub mod curve25519;
+pub mod ed25519;
