@@ -39,8 +39,19 @@ pub mod rsa;
 
 pub mod random;
 pub use random::{
-    Random
+    Random,
+    Yarrow,
 };
 
 pub mod curve25519;
 pub mod ed25519;
+pub mod dsa;
+pub mod ecdsa;
+pub use ecdsa::{
+    Curve,
+    Secp192r1,
+    Secp224r1,
+    Secp256r1,
+    Secp384r1,
+    Secp521r1,
+};
