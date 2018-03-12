@@ -6,6 +6,10 @@ use nettle_sys::{
 };
 use std::mem::zeroed;
 use super::Params;
+use helper::{
+    convert_buffer_to_gmpz,
+    convert_gmpz_to_buffer
+};
 use Random;
 
 pub struct PublicKey {
@@ -14,11 +18,13 @@ pub struct PublicKey {
 
 impl PublicKey {
     pub fn new(y: &[u8]) -> PublicKey {
-        unimplemented!()
+        PublicKey{
+            public: [convert_buffer_to_gmpz(y)],
+        }
     }
 
     pub fn as_bytes(&self) -> Box<[u8]> {
-        unimplemented!()
+        convert_gmpz_to_buffer(self.public[0])
     }
 }
 
@@ -36,11 +42,13 @@ pub struct PrivateKey {
 
 impl PrivateKey {
     pub fn new(x: &[u8]) -> PrivateKey {
-        unimplemented!()
+        PrivateKey{
+            private: [convert_buffer_to_gmpz(x)],
+        }
     }
 
     pub fn as_bytes(&self) -> Box<[u8]> {
-        unimplemented!()
+        convert_gmpz_to_buffer(self.private[0])
     }
 }
 
@@ -79,7 +87,7 @@ mod tests {
     #[test]
     fn generate_key() {
         let mut rand = Yarrow::default();
-        let params = Params::new(&mut rand,1024,160).unwrap();
+        let params = Params::generate(&mut rand,1024,160).unwrap();
 
         for _ in 0..3 {
             let _ = generate_keypair(&params,&mut rand);

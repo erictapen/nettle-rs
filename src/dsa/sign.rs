@@ -39,7 +39,7 @@ mod tests {
     #[test]
     fn sign_verify() {
         let mut rand = Yarrow::default();
-        let params = Params::new(&mut rand, 1024, 160).unwrap();
+        let params = Params::generate(&mut rand, 1024, 160).unwrap();
         let (mut public,mut private) = generate_keypair(&params, &mut rand);
 
         for _ in 0..3 {

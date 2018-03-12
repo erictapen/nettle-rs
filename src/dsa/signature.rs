@@ -3,6 +3,10 @@ use nettle_sys::{
     nettle_dsa_signature_init,
     nettle_dsa_signature_clear,
 };
+use helper::{
+    convert_buffer_to_gmpz,
+    convert_gmpz_to_buffer,
+};
 use std::mem::zeroed;
 
 pub struct Signature {
@@ -10,16 +14,24 @@ pub struct Signature {
 }
 
 impl Signature {
-    pub fn new(r: &[u8], s: &[u8]) -> Result<Signature> {
-        unimplemented!()
+    pub fn new(r: &[u8], s: &[u8]) -> Signature {
+        unsafe {
+            let mut ret = zeroed();
+
+            nettle_dsa_signature_init(&mut ret);
+            ret.r[0] = convert_buffer_to_gmpz(r);
+            ret.s[0] = convert_buffer_to_gmpz(s);
+
+            Signature{ signature: ret }
+        }
     }
 
     pub fn r(&self) -> Box<[u8]> {
-        unimplemented!()
+        convert_gmpz_to_buffer(self.signature.r[0])
     }
 
     pub fn s(&self) -> Box<[u8]> {
-        unimplemented!()
+        convert_gmpz_to_buffer(self.signature.s[0])
     }
 }
 

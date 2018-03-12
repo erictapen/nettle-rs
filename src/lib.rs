@@ -9,6 +9,8 @@ mod errors {
 }
 use errors::*;
 
+mod helper;
+
 pub mod hash;
 pub use hash::{
     Hash,
