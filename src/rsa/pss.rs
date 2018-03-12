@@ -15,15 +15,15 @@ use std::mem::zeroed;
 use Random;
 use Hash;
 use hash::{Sha256,Sha384,Sha512};
-use rsa::{RsaPublicKey,RsaPrivateKey};
+use rsa::{PublicKey,PrivateKey};
 
 pub trait PssHash: Hash {
-    fn sign<R: Random>(public: &RsaPublicKey, private: &RsaPrivateKey, random: &mut R, salt: &[u8], digest: &[u8], signature: &mut [u8]) -> Result<()>;
-    fn verify(public: &RsaPublicKey, salt_len: usize, digest: &[u8], signature: &[u8]) -> Result<bool>;
+    fn sign<R: Random>(public: &PublicKey, private: &PrivateKey, random: &mut R, salt: &[u8], digest: &[u8], signature: &mut [u8]) -> Result<()>;
+    fn verify(public: &PublicKey, salt_len: usize, digest: &[u8], signature: &[u8]) -> Result<bool>;
 }
 
 impl PssHash for Sha256 {
-    fn sign<R: Random>(public: &RsaPublicKey, private: &RsaPrivateKey, random: &mut R, salt: &[u8], digest: &[u8], signature: &mut [u8]) -> Result<()> {
+    fn sign<R: Random>(public: &PublicKey, private: &PrivateKey, random: &mut R, salt: &[u8], digest: &[u8], signature: &mut [u8]) -> Result<()> {
         unsafe {
             let mut sig = zeroed();
 
@@ -42,7 +42,7 @@ impl PssHash for Sha256 {
         }
     }
 
-    fn verify(public: &RsaPublicKey, salt_len: usize, digest: &[u8], signature: &[u8]) -> Result<bool> {
+    fn verify(public: &PublicKey, salt_len: usize, digest: &[u8], signature: &[u8]) -> Result<bool> {
         unsafe {
             let mut sig = zeroed();
 
@@ -58,7 +58,7 @@ impl PssHash for Sha256 {
 }
 
 impl PssHash for Sha384 {
-    fn sign<R: Random>(public: &RsaPublicKey, private: &RsaPrivateKey, random: &mut R, salt: &[u8], digest: &[u8], signature: &mut [u8]) -> Result<()> {
+    fn sign<R: Random>(public: &PublicKey, private: &PrivateKey, random: &mut R, salt: &[u8], digest: &[u8], signature: &mut [u8]) -> Result<()> {
         unsafe {
             let mut sig = zeroed();
 
@@ -77,7 +77,7 @@ impl PssHash for Sha384 {
         }
     }
 
-    fn verify(public: &RsaPublicKey, salt_len: usize, digest: &[u8], signature: &[u8]) -> Result<bool> {
+    fn verify(public: &PublicKey, salt_len: usize, digest: &[u8], signature: &[u8]) -> Result<bool> {
         unsafe {
             let mut sig = zeroed();
 
@@ -93,7 +93,7 @@ impl PssHash for Sha384 {
 }
 
 impl PssHash for Sha512 {
-    fn sign<R: Random>(public: &RsaPublicKey, private: &RsaPrivateKey, random: &mut R, salt: &[u8], digest: &[u8], signature: &mut [u8]) -> Result<()> {
+    fn sign<R: Random>(public: &PublicKey, private: &PrivateKey, random: &mut R, salt: &[u8], digest: &[u8], signature: &mut [u8]) -> Result<()> {
         unsafe {
             let mut sig = zeroed();
 
@@ -112,7 +112,7 @@ impl PssHash for Sha512 {
         }
     }
 
-    fn verify(public: &RsaPublicKey, salt_len: usize, digest: &[u8], signature: &[u8]) -> Result<bool> {
+    fn verify(public: &PublicKey, salt_len: usize, digest: &[u8], signature: &[u8]) -> Result<bool> {
         unsafe {
             let mut sig = zeroed();
 
@@ -127,14 +127,14 @@ impl PssHash for Sha512 {
     }
 }
 
-pub fn sign_pss<H: PssHash, R: Random>(public: &RsaPublicKey, private: &RsaPrivateKey, salt: &[u8], hash: &mut H, random: &mut R, signature: &mut [u8]) -> Result<()> {
+pub fn sign_pss<H: PssHash, R: Random>(public: &PublicKey, private: &PrivateKey, salt: &[u8], hash: &mut H, random: &mut R, signature: &mut [u8]) -> Result<()> {
     let mut dst = vec![0u8; hash.digest_size()];
 
     hash.digest(&mut dst);
     H::sign(public,private,random,salt,&dst,signature)
 }
 
-pub fn verify_pss<H: PssHash>(public: &RsaPublicKey, salt_len: usize, hash: &mut H, signature: &[u8]) -> Result<bool> {
+pub fn verify_pss<H: PssHash>(public: &PublicKey, salt_len: usize, hash: &mut H, signature: &[u8]) -> Result<bool> {
     let mut dst = vec![0u8; hash.digest_size()];
 
     hash.digest(&mut dst);
@@ -154,8 +154,8 @@ mod tests {
         let d = &b"\x38\x3a\x6f\x19\xe1\xea\x27\xfd\x08\xc7\xfb\xc3\xbf\xa6\x84\xbd\x63\x29\x88\x8c\x0b\xbe\x4c\x98\x62\x5e\x71\x81\xf4\x11\xcf\xd0\x85\x31\x44\xa3\x03\x94\x04\xdd\xa4\x1b\xce\x2e\x31\xd5\x88\xec\x57\xc0\xe1\x48\x14\x6f\x0f\xa6\x5b\x39\x00\x8b\xa5\x83\x5f\x82\x9b\xa3\x5a\xe2\xf1\x55\xd6\x1b\x8a\x12\x58\x1b\x99\xc9\x27\xfd\x2f\x22\x25\x2c\x5e\x73\xcb\xa4\xa6\x10\xdb\x39\x73\xe0\x19\xee\x0f\x95\x13\x0d\x43\x19\xed\x41\x34\x32\xf2\xe5\xe2\x0d\x52\x15\xcd\xd2\x7c\x21\x64\x20\x6b\x3f\x80\xed\xee\x51\x93\x8a\x25\xc1"[..];
         let p = &b"\xd2\xa4\xec\x0f\xa2\x22\x6c\xde\x82\xda\x77\x65\x3b\x07\x2c\xd0\x98\x53\x5d\x3e\x90\xed\x4d\x72\x24\xdc\xb8\xcb\x8b\x93\x14\x76\x8d\xc5\x17\xe2\x2d\x7c\x8f\xa1\x3f\x25\x3d\xaa\x74\x65\xa7\x99\x56\x09\x8a\xa4\xcc\x3a\x6e\x35\xe8\xb1\xfc\xc4\xf9\x7e\x77\x4f"[..];
         let q = &b"\xe5\x56\x3b\x14\x5d\xb6\xff\x5a\x16\x28\x0d\x3e\x80\xef\xf0\x2f\x18\x1d\xbd\x03\x32\x4e\xf2\x47\xf5\x96\xa4\xd4\xa7\xb8\xda\xa3\x2b\x99\x34\xe3\xc7\xf4\xdc\xf6\xa3\x10\x54\x62\xde\xc6\x38\x39\x63\x86\x18\x41\x8b\x51\xdb\x02\x69\x3f\xab\xb4\xe6\x83\x87\x25"[..];
-        let public = RsaPublicKey::new(n,e).unwrap();
-        let private = RsaPrivateKey::new(d,p,q,None).unwrap();
+        let public = PublicKey::new(n,e).unwrap();
+        let private = PrivateKey::new(d,p,q,None).unwrap();
 
         {
 

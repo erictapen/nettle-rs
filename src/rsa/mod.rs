@@ -1,7 +1,7 @@
 mod keys;
 pub use self::keys::{
-    RsaPrivateKey,
-    RsaPublicKey,
+    PrivateKey,
+    PublicKey,
     generate_keypair,
 };
 
