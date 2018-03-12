@@ -46,6 +46,26 @@ impl PublicKey {
             }
         }
     }
+
+    pub fn n(&self) -> Box<[u8]> {
+        let mut n = self.context.n[0];
+        unsafe {
+            let mut ret = vec![0u8; nettle_mpz_sizeinbase_256_u(&mut n)];
+
+            nettle_mpz_get_str_256(ret.len(), ret.as_mut_ptr(), &mut n);
+            ret.into()
+        }
+    }
+
+    pub fn e(&self) -> Box<[u8]> {
+        let mut e = self.context.e[0];
+        unsafe {
+            let mut ret = vec![0u8; nettle_mpz_sizeinbase_256_u(&mut e)];
+
+            nettle_mpz_get_str_256(ret.len(), ret.as_mut_ptr(), &mut e);
+            ret.into()
+        }
+    }
 }
 
 impl Drop for PublicKey {
