@@ -10,6 +10,8 @@ use ::nettle_sys::{
     nettle_rsa_private_key_clear,
     nettle_rsa_private_key_prepare,
     nettle_mpz_set_str_256_u,
+    nettle_mpz_get_str_256,
+    nettle_mpz_sizeinbase_256_u,
     __gmpz_fdiv_r,
     __gmpz_add_ui,
     __gmpz_sub_ui,

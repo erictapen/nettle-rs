@@ -11,10 +11,10 @@ use ::nettle_sys::{
     nettle_ecc_point_clear,
     nettle_mpz_set_str_256_u,
     nettle_mpz_get_str_256,
+    nettle_mpz_sizeinbase_256_u,
     nettle_ecdsa_generate_keypair,
     __gmpz_init,
     __gmpz_clear,
-    __gmpz_sizeinbase,
 };
 use std::mem::zeroed;
 use {Curve,Random,Result};
@@ -46,14 +46,14 @@ impl PrivateKey {
         }
     }
 
-    pub fn get(&self) -> Box<[u8]> {
+    pub fn as_bytes(&self) -> Box<[u8]> {
         unsafe {
             let mut mpz = zeroed();
 
             __gmpz_init(&mut mpz as *mut _);
             nettle_ecc_scalar_get(&self.scalar as *const _, &mut mpz);
 
-            let mut ret = vec![0u8; __gmpz_sizeinbase(&mpz, 256)];
+            let mut ret = vec![0u8; nettle_mpz_sizeinbase_256_u(&mut mpz)];
             nettle_mpz_get_str_256(ret.len(), ret.as_mut_ptr(), &mut mpz);
             __gmpz_clear(&mut mpz as *mut _);
 
@@ -102,7 +102,7 @@ impl PublicKey {
         }
     }
 
-    pub fn get(&self) -> (Box<[u8]>,Box<[u8]>) {
+    pub fn as_bytes(&self) -> (Box<[u8]>,Box<[u8]>) {
         unsafe {
             let mut x_mpz = zeroed();
             let mut y_mpz = zeroed();
@@ -111,8 +111,8 @@ impl PublicKey {
             __gmpz_init(&mut y_mpz as *mut _);
             nettle_ecc_point_get(&self.point as *const _, &mut x_mpz, &mut y_mpz);
 
-            let mut x_ret = vec![0u8; __gmpz_sizeinbase(&x_mpz, 256)];
-            let mut y_ret = vec![0u8; __gmpz_sizeinbase(&y_mpz, 256)];
+            let mut x_ret = vec![0u8; nettle_mpz_sizeinbase_256_u(&mut x_mpz)];
+            let mut y_ret = vec![0u8; nettle_mpz_sizeinbase_256_u(&mut y_mpz)];
             nettle_mpz_get_str_256(x_ret.len(), x_ret.as_mut_ptr(), &mut x_mpz);
             nettle_mpz_get_str_256(y_ret.len(), y_ret.as_mut_ptr(), &mut y_mpz);
             __gmpz_clear(&mut x_mpz as *mut _);
