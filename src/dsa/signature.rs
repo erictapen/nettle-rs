@@ -9,6 +9,20 @@ pub struct Signature {
     pub(crate) signature: dsa_signature,
 }
 
+impl Signature {
+    pub fn new(r: &[u8], s: &[u8]) -> Result<Signature> {
+        unimplemented!()
+    }
+
+    pub fn r(&self) -> Box<[u8]> {
+        unimplemented!()
+    }
+
+    pub fn s(&self) -> Box<[u8]> {
+        unimplemented!()
+    }
+}
+
 impl Default for Signature {
     fn default() -> Signature {
         unsafe {

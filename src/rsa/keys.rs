@@ -140,6 +140,18 @@ impl PrivateKey {
             }
         }
     }
+
+    pub fn primes(&self) -> (Box<u8>,Box<u8>) {
+        unimplemented!()
+    }
+
+    pub fn d_crt(&self) -> (Box<u8>,Box<u8>) {
+        unimplemented!()
+    }
+
+    pub fn d(&self) -> Box<u8> {
+        unimplemented!()
+    }
 }
 
 impl Drop for PrivateKey {

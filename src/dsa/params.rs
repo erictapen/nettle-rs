@@ -15,6 +15,24 @@ pub struct Params {
     pub(crate) params: dsa_params,
 }
 
+impl Params {
+    pub fn new(p: &[u8], q: &[u8], g: &[u8]) -> Params {
+        unimplemented!()
+    }
+
+    pub fn p(&self) -> Box<[u8]> {
+        unimplemented!()
+    }
+
+    pub fn q(&self) -> Box<[u8]> {
+        unimplemented!()
+    }
+
+    pub fn g(&self) -> Box<[u8]> {
+        unimplemented!()
+    }
+}
+
 impl Drop for Params {
     fn drop(&mut self) {
         unsafe {

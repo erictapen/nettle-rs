@@ -12,6 +12,16 @@ pub struct PublicKey {
     pub(crate) public: mpz_t,
 }
 
+impl PublicKey {
+    pub fn new(y: &[u8]) -> PublicKey {
+        unimplemented!()
+    }
+
+    pub fn as_bytes(&self) -> Box<[u8]> {
+        unimplemented!()
+    }
+}
+
 impl Drop for PublicKey {
     fn drop(&mut self) {
         unsafe {
@@ -23,6 +33,17 @@ impl Drop for PublicKey {
 pub struct PrivateKey {
     pub(crate) private: mpz_t,
 }
+
+impl PrivateKey {
+    pub fn new(x: &[u8]) -> PrivateKey {
+        unimplemented!()
+    }
+
+    pub fn as_bytes(&self) -> Box<[u8]> {
+        unimplemented!()
+    }
+}
+
 
 impl Drop for PrivateKey {
     fn drop(&mut self) {
