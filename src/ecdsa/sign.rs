@@ -4,9 +4,9 @@ use nettle_sys::{
 };
 use std::mem::zeroed;
 use {dsa,Random};
-use super::{Scalar,Point};
+use super::{PrivateKey,PublicKey};
 
-pub fn sign<R: Random>(private: &Scalar, digest: &[u8], random: &mut R) -> dsa::Signature {
+pub fn sign<R: Random>(private: &PrivateKey, digest: &[u8], random: &mut R) -> dsa::Signature {
     unsafe {
         let mut ret = zeroed();
 
@@ -15,7 +15,7 @@ pub fn sign<R: Random>(private: &Scalar, digest: &[u8], random: &mut R) -> dsa::
     }
 }
 
-pub fn verify(public: &Point, digest: &[u8], signature: &dsa::Signature) -> bool {
+pub fn verify(public: &PublicKey, digest: &[u8], signature: &dsa::Signature) -> bool {
     unsafe {
         nettle_ecdsa_verify(&public.point, digest.len(), digest.as_ptr(), &signature.signature as *const _) == 1
     }

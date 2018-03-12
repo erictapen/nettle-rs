@@ -11,8 +11,8 @@ pub use self::curves::{
 mod keys;
 pub use self::keys::{
     generate_keypair,
-    Point,
-    Scalar,
+    PublicKey,
+    PrivateKey,
 };
 
 mod sign;

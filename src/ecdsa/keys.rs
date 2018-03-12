@@ -19,12 +19,12 @@ use ::nettle_sys::{
 use std::mem::zeroed;
 use {Curve,Random,Result};
 
-pub struct Scalar {
+pub struct PrivateKey {
     pub(crate) scalar: ecc_scalar,
 }
 
-impl Scalar {
-    pub fn new<C: Curve>(num: &[u8]) -> Result<Scalar> {
+impl PrivateKey {
+    pub fn new<C: Curve>(num: &[u8]) -> Result<PrivateKey> {
         unsafe {
             let mut scalar: ecc_scalar = zeroed();
 
@@ -37,7 +37,7 @@ impl Scalar {
             if nettle_ecc_scalar_set(&mut scalar as *mut _, &mut mpz) == 1 {
                 __gmpz_clear(&mut mpz as *mut _);
 
-                Ok(Scalar{ scalar: scalar })
+                Ok(PrivateKey{ scalar: scalar })
             } else {
                 __gmpz_clear(&mut mpz as *mut _);
 
@@ -62,7 +62,7 @@ impl Scalar {
     }
 }
 
-impl Drop for Scalar {
+impl Drop for PrivateKey {
     fn drop(&mut self) {
         unsafe {
             nettle_ecc_scalar_clear(&mut self.scalar as *mut _);
@@ -70,12 +70,12 @@ impl Drop for Scalar {
     }
 }
 
-pub struct Point {
+pub struct PublicKey {
     pub(crate) point: ecc_point,
 }
 
-impl Point {
-    pub fn new<C: Curve>(x: &[u8], y: &[u8]) -> Result<Point> {
+impl PublicKey {
+    pub fn new<C: Curve>(x: &[u8], y: &[u8]) -> Result<PublicKey> {
         unsafe {
             let mut point: ecc_point = zeroed();
             nettle_ecc_point_init(&mut point as *mut _, C::get_curve());
@@ -92,7 +92,7 @@ impl Point {
                 __gmpz_clear(&mut x_mpz as *mut _);
                 __gmpz_clear(&mut y_mpz as *mut _);
 
-                Ok(Point{ point: point })
+                Ok(PublicKey{ point: point })
             } else {
                 __gmpz_clear(&mut x_mpz as *mut _);
                 __gmpz_clear(&mut y_mpz as *mut _);
@@ -123,7 +123,7 @@ impl Point {
     }
 }
 
-impl Drop for Point {
+impl Drop for PublicKey {
     fn drop(&mut self) {
         unsafe {
             nettle_ecc_point_clear(&mut self.point as *mut _);
@@ -131,7 +131,7 @@ impl Drop for Point {
     }
 }
 
-pub fn generate_keypair<C: Curve, R: Random>(random: &mut R) -> Result<(Point,Scalar)> {
+pub fn generate_keypair<C: Curve, R: Random>(random: &mut R) -> Result<(PublicKey,PrivateKey)> {
     unsafe {
         let mut point = zeroed();
         let mut scalar = zeroed();
@@ -140,8 +140,8 @@ pub fn generate_keypair<C: Curve, R: Random>(random: &mut R) -> Result<(Point,Sc
         nettle_ecc_scalar_init(&mut scalar, C::get_curve());
         nettle_ecdsa_generate_keypair(&mut point, &mut scalar, random.context(), Some(R::random));
 
-        let point = Point{ point: point };
-        let scalar = Scalar{ scalar: scalar };
+        let point = PublicKey{ point: point };
+        let scalar = PrivateKey{ scalar: scalar };
 
         Ok((point,scalar))
     }
