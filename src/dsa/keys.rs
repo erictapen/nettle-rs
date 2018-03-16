@@ -1,6 +1,7 @@
 use nettle_sys::{
     __gmpz_init,
     __gmpz_clear,
+    __gmpz_init_set,
     mpz_t,
     nettle_dsa_generate_keypair,
 };
@@ -28,6 +29,17 @@ impl PublicKey {
     }
 }
 
+impl Clone for PublicKey {
+    fn clone(&self) -> Self {
+        unsafe {
+            let mut ret: mpz_t = zeroed();
+
+            __gmpz_init_set(&mut ret[0], &self.public[0]);
+            PublicKey{ public: ret }
+        }
+    }
+}
+
 impl Drop for PublicKey {
     fn drop(&mut self) {
         unsafe {
@@ -52,6 +64,16 @@ impl PrivateKey {
     }
 }
 
+impl Clone for PrivateKey {
+    fn clone(&self) -> Self {
+        unsafe {
+            let mut ret: mpz_t = zeroed();
+
+            __gmpz_init_set(&mut ret[0], &self.private[0]);
+            PrivateKey{ private: ret }
+        }
+    }
+}
 
 impl Drop for PrivateKey {
     fn drop(&mut self) {

@@ -17,6 +17,7 @@ use ::nettle_sys::{
     __gmpz_clear,
 };
 use std::mem::zeroed;
+use helper::convert_buffer_to_gmpz;
 use {Curve,Random,Result};
 
 pub struct PrivateKey {
@@ -58,6 +59,23 @@ impl PrivateKey {
             __gmpz_clear(&mut mpz as *mut _);
 
             ret.into()
+        }
+    }
+}
+
+impl Clone for PrivateKey {
+    fn clone(&self) -> Self {
+        unsafe {
+            // XXX: no nettle_ecc_scalar_copy()
+            let buf = self.as_bytes();
+            let mut mpz = convert_buffer_to_gmpz(&*buf);
+            let mut ret: ecc_scalar = zeroed();
+
+            nettle_ecc_scalar_init(&mut ret, self.scalar.ecc);
+            assert_eq!(nettle_ecc_scalar_set(&mut ret, &mut mpz), 1);
+            __gmpz_clear(&mut mpz);
+
+            PrivateKey{ scalar: ret }
         }
     }
 }
@@ -122,6 +140,26 @@ impl PublicKey {
         }
     }
 }
+
+impl Clone for PublicKey {
+    fn clone(&self) -> Self {
+        unsafe {
+            // XXX: no nettle_ecc_scalar_copy()
+            let (buf_x,buf_y) = self.as_bytes();
+            let mut mpz_x = convert_buffer_to_gmpz(&*buf_x);
+            let mut mpz_y = convert_buffer_to_gmpz(&*buf_y);
+            let mut ret: ecc_point = zeroed();
+
+            nettle_ecc_point_init(&mut ret, self.point.ecc);
+            assert_eq!(nettle_ecc_point_set(&mut ret, &mut mpz_x,&mut mpz_y), 1);
+            __gmpz_clear(&mut mpz_x);
+            __gmpz_clear(&mut mpz_y);
+
+            PublicKey{ point: ret }
+        }
+    }
+}
+
 
 impl Drop for PublicKey {
     fn drop(&mut self) {

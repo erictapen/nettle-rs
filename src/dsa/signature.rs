@@ -2,6 +2,7 @@ use nettle_sys::{
     dsa_signature,
     nettle_dsa_signature_init,
     nettle_dsa_signature_clear,
+    __gmpz_init_set,
 };
 use helper::{
     convert_buffer_to_gmpz,
@@ -35,13 +36,16 @@ impl Signature {
     }
 }
 
-impl Default for Signature {
-    fn default() -> Signature {
+impl Clone for Signature {
+    fn clone(&self) -> Self {
         unsafe {
-            let mut signature: dsa_signature = zeroed();
+            let mut ret = zeroed();
 
-            nettle_dsa_signature_init(&mut signature as *mut _);
-            Signature{ signature: signature }
+            nettle_dsa_signature_init(&mut ret);
+            __gmpz_init_set(&mut ret.r[0], &self.signature.r[0]);
+            __gmpz_init_set(&mut ret.s[0], &self.signature.s[0]);
+
+            Signature{ signature: ret }
         }
     }
 }

@@ -14,6 +14,7 @@ use ::nettle_sys::{
     __gmpz_add_ui,
     __gmpz_sub_ui,
     __gmpz_invert,
+    __gmpz_init_set,
 };
 use std::mem::zeroed;
 use Random;
@@ -52,6 +53,23 @@ impl PublicKey {
 
     pub fn e(&self) -> Box<[u8]> {
         convert_gmpz_to_buffer(self.context.e[0])
+    }
+}
+
+impl Clone for PublicKey {
+    fn clone(&self) -> Self {
+        unsafe {
+            let mut ret = zeroed();
+
+            nettle_rsa_public_key_init(&mut ret);
+            __gmpz_init_set(&mut ret.e[0], &self.context.e[0]);
+            __gmpz_init_set(&mut ret.n[0], &self.context.n[0]);
+
+            PublicKey {
+                context: ret,
+                modulo_bytes: self.modulo_bytes,
+            }
+        }
     }
 }
 
@@ -144,6 +162,22 @@ impl PrivateKey {
 
     pub fn d(&self) -> Box<[u8]> {
         convert_gmpz_to_buffer(self.context.d[0])
+    }
+}
+
+impl Clone for PrivateKey {
+    fn clone(&self) -> Self {
+        unsafe {
+            let mut ret = zeroed();
+
+            nettle_rsa_private_key_init(&mut ret);
+            __gmpz_init_set(&mut ret.p[0], &self.context.p[0]);
+            __gmpz_init_set(&mut ret.q[0], &self.context.q[0]);
+            __gmpz_init_set(&mut ret.a[0], &self.context.a[0]);
+            __gmpz_init_set(&mut ret.b[0], &self.context.b[0]);
+
+            PrivateKey{ context: ret, }
+        }
     }
 }
 

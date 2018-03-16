@@ -3,6 +3,7 @@ use nettle_sys::{
     nettle_dsa_params_init,
     nettle_dsa_params_clear,
     nettle_dsa_generate_params,
+    __gmpz_init_set,
 };
 use helper::{
     convert_buffer_to_gmpz,
@@ -57,6 +58,21 @@ impl Params {
 
     pub fn g(&self) -> Box<[u8]> {
         convert_gmpz_to_buffer(self.params.g[0])
+    }
+}
+
+impl Clone for Params {
+    fn clone(&self) -> Self {
+        unsafe {
+            let mut ret = zeroed();
+
+            nettle_dsa_params_init(&mut ret);
+            __gmpz_init_set(&mut ret.p[0], &self.params.p[0]);
+            __gmpz_init_set(&mut ret.q[0], &self.params.q[0]);
+            __gmpz_init_set(&mut ret.g[0], &self.params.g[0]);
+
+            Params{ params: ret }
+        }
     }
 }
 
