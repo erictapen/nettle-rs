@@ -5,6 +5,7 @@ pub mod insecure_do_not_use;
 mod cipher;
 pub use self::cipher::{
     Cipher,
+    BlockSizeIs16,
     RawCipherFunctionPointer,
 };
 

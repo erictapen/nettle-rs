@@ -6,6 +6,7 @@ use std::mem::zeroed;
 use {dsa,Random};
 use super::{PrivateKey,PublicKey};
 
+/// Signs `digest` using the key `private`. Returns the signature.
 pub fn sign<R: Random>(private: &PrivateKey, digest: &[u8], random: &mut R) -> dsa::Signature {
     unsafe {
         let mut ret = zeroed();
@@ -15,6 +16,8 @@ pub fn sign<R: Random>(private: &PrivateKey, digest: &[u8], random: &mut R) -> d
     }
 }
 
+/// Verify `signature` of `digest` using the key `public`. Returns `true` if the signature is
+/// valid.
 pub fn verify(public: &PublicKey, digest: &[u8], signature: &dsa::Signature) -> bool {
     unsafe {
         nettle_ecdsa_verify(&public.point, digest.len(), digest.as_ptr(), &signature.signature as *const _) == 1

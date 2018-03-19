@@ -1,3 +1,5 @@
+//! Encryption and siging using PKCS#1.
+
 use Result;
 use ::nettle_sys::{
     nettle_mpz_set_str_256_u,
@@ -16,7 +18,9 @@ use hash::insecure_do_not_use::{Md2,Md5,Sha1};
 use hash::{Sha224,Sha256,Sha384,Sha512};
 use rsa::{PublicKey,PrivateKey};
 
+/// Marker trait for hash algorithms usable for PKCS#1 signatures.
 pub trait Pkcs1Hash: Hash {
+    /// Internal to `sign_pkcs1` and `verify_pkcs1`.
     fn oid(&self) -> &'static [u8];
 }
 
@@ -70,7 +74,7 @@ impl Pkcs1Hash for Sha512 {
     }
 }
 
-pub fn sign_digest_pkcs1<R: Random>(public: &PublicKey, private: &PrivateKey, digest: &[u8], digest_info: &[u8], random: &mut R, signature: &mut [u8]) -> Result<()> {
+fn sign_digest_pkcs1<R: Random>(public: &PublicKey, private: &PrivateKey, digest: &[u8], digest_info: &[u8], random: &mut R, signature: &mut [u8]) -> Result<()> {
     unsafe {
         let mut sig = zeroed();
         let mut msg = vec![0u8; digest.len() + digest_info.len()];
@@ -93,7 +97,7 @@ pub fn sign_digest_pkcs1<R: Random>(public: &PublicKey, private: &PrivateKey, di
     }
 }
 
-pub fn verify_digest_pkcs1(public: &PublicKey, digest: &[u8], digest_info: &[u8], signature: &[u8]) -> Result<bool> {
+fn verify_digest_pkcs1(public: &PublicKey, digest: &[u8], digest_info: &[u8], signature: &[u8]) -> Result<bool> {
     unsafe {
         let mut sig = zeroed();
         let mut msg = vec![0u8; digest.len() + digest_info.len()];
@@ -111,20 +115,32 @@ pub fn verify_digest_pkcs1(public: &PublicKey, digest: &[u8], digest_info: &[u8]
     }
 }
 
-pub fn sign_pkcs1<H: Pkcs1Hash, R: Random>(public: &PublicKey, private: &PrivateKey, hash: &mut H, random: &mut R, signature: &mut [u8]) -> Result<()> {
+/// Signs the message hashed with `hash` using `public`/`private`, producing `signature`. The
+/// `signature` buffer is expected to be of the size of the modulo of `public`.
+///
+/// The function signs the digest produced by `hash` after padding the digest using `EMSA-PKCS1-v1_5`.
+pub fn sign_pkcs1<H: Hash + Pkcs1Hash, R: Random>(public: &PublicKey, private: &PrivateKey, hash: &mut H, random: &mut R, signature: &mut [u8]) -> Result<()> {
     let mut dst = vec![0u8; hash.digest_size()];
 
     hash.digest(&mut dst);
     sign_digest_pkcs1(public,private,&dst,hash.oid(),random,signature)
 }
 
-pub fn verify_pkcs1<H: Pkcs1Hash>(public: &PublicKey, hash: &mut H, signature: &[u8]) -> Result<bool> {
+/// Verifies `signature` of the data hashed by `hash` using `public`. Returns `true` if the
+/// signature is valid.
+///
+/// The signature is expected to be padded using `EMSA-PKCS1-v1_5`.
+pub fn verify_pkcs1<H: Hash + Pkcs1Hash>(public: &PublicKey, hash: &mut H, signature: &[u8]) -> Result<bool> {
     let mut dst = vec![0u8; hash.digest_size()];
 
     hash.digest(&mut dst);
     verify_digest_pkcs1(public,&dst,hash.oid(),signature)
 }
 
+/// Encrypts `plaintext` using `public`, producing `ciphertext`. Both buffers are expected to have
+/// the same size as the modulo of `public`.
+///
+/// The plaintext is padded using `RSAES-PKCS1-v1_5`.
 pub fn encrypt_pkcs1<R: Random>(public: &PublicKey, random: &mut R, plaintext: &[u8], ciphertext: &mut [u8]) -> Result<()> {
     unsafe {
         let mut out = zeroed();
@@ -144,6 +160,9 @@ pub fn encrypt_pkcs1<R: Random>(public: &PublicKey, random: &mut R, plaintext: &
     }
 }
 
+/// Decrypts `ciphertext` using `public`/`private`. Returns the resulting plaintext.
+///
+/// The ciphertext expected to be padded using `RSAES-PKCS1-v1_5`.
 pub fn decrypt_pkcs1<R: Random>(public: &PublicKey, private: &PrivateKey, random: &mut R, ciphertext: &[u8]) -> Result<Box<[u8]>> {
      unsafe {
         let mut inp = zeroed();

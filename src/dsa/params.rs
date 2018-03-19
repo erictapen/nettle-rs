@@ -16,11 +16,15 @@ use {
     Result
 };
 
+/// Public parameters for DSA signatures.
+///
+/// DSA uses the ring Z/pqZ (p,q are primes) and a generator `g` of that group.
 pub struct Params {
     pub(crate) params: dsa_params,
 }
 
 impl Params {
+    /// Create a new DSA parameter structure with primes `p` and `q` and generator `g`.
     pub fn new(p: &[u8], q: &[u8], g: &[u8]) -> Params {
         unsafe {
             let mut ret: dsa_params = zeroed();
@@ -36,6 +40,10 @@ impl Params {
         }
     }
 
+    /// Generates a fresh set of parameters.
+    ///
+    /// `p_bits` and `q_bits` are the size of the primes. FIPS-186 expects `q_bits = 160`
+    /// and `p_bits = 512 + 64l` for `l = [0-8]`. The Nettle documentation recommends 1024.
     pub fn generate<R: Random>(random: &mut R, p_bits: usize, q_bits: usize) -> Result<Params> {
         unsafe {
             let mut ret = zeroed();
@@ -49,6 +57,7 @@ impl Params {
         }
     }
 
+    /// Returns the primes `p` and `q` ad big endian integers.
     pub fn primes(&self) -> (Box<[u8]>,Box<[u8]>) {
         let p = convert_gmpz_to_buffer(self.params.p[0]);
         let q = convert_gmpz_to_buffer(self.params.q[0]);
@@ -56,6 +65,7 @@ impl Params {
         (p,q)
     }
 
+    /// Returns the generator `g` as big endian integer.
     pub fn g(&self) -> Box<[u8]> {
         convert_gmpz_to_buffer(self.params.g[0])
     }

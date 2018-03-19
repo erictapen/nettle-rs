@@ -1,3 +1,5 @@
+//! Cryptographic random number generators (CRNG).
+
 use ::nettle_sys::{
     yarrow256_ctx,
     nettle_yarrow256_init,
@@ -11,16 +13,23 @@ use std::os::raw::c_void;
 use std::ptr;
 use ::rand::{Rng,OsRng};
 
+/// A cryptographic random number generator.
 pub trait Random {
+    /// Returns a pointer to the opaque CRNG state.
     unsafe fn context(&mut self) -> *mut c_void;
+    /// Fills the buffer `dst` with `length` random bytes, advancing the CRNG state `ctx`.
     unsafe extern "C" fn random(ctx: *mut c_void, length: size_t, dst: *mut u8);
 }
 
+/// Yarrow is a secure CRNG developed by Kelsey et.al.
+///
+/// Default instances are seeded using `OsRng`.
 pub struct Yarrow {
     context: yarrow256_ctx,
 }
 
 impl Yarrow {
+    /// Create a new CRNG instance for `seed`.
     pub fn from_seed(seed: &[u8]) -> Yarrow {
         unsafe {
             let mut ctx = zeroed();
@@ -32,6 +41,7 @@ impl Yarrow {
         }
     }
 
+    /// Fills the buffer `random` with random bytes.
     pub fn random(&mut self, random: &mut [u8]) {
         unsafe {
             assert_eq!(nettle_yarrow256_is_seeded(&mut self.context as *mut _), 1);

@@ -1,4 +1,14 @@
 use std::os::raw::c_void;
+use super::{
+    Aes128,
+    Aes192,
+    Aes256,
+    Twofish,
+    Camellia128,
+    Camellia192,
+    Camellia256,
+    Serpent,
+};
 
 /// Used internally for cipher modes.
 pub struct RawCipherFunctionPointer {
@@ -54,3 +64,15 @@ pub trait Cipher: Sized {
     /// Pointer to the *_encrypt C function. Used internally for block modi.
     fn raw_encrypt_function() -> RawCipherFunctionPointer;
 }
+
+/// Marker trait for ciphers with 16 byte block size.
+pub trait BlockSizeIs16: Cipher {}
+
+impl BlockSizeIs16 for Aes128 {}
+impl BlockSizeIs16 for Aes192 {}
+impl BlockSizeIs16 for Aes256 {}
+impl BlockSizeIs16 for Twofish {}
+impl BlockSizeIs16 for Camellia128 {}
+impl BlockSizeIs16 for Camellia192 {}
+impl BlockSizeIs16 for Camellia256 {}
+impl BlockSizeIs16 for Serpent {}

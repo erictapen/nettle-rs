@@ -1,3 +1,5 @@
+#![warn(missing_docs)]
+
 extern crate nettle_sys;
 extern crate libc;
 extern crate rand;
@@ -19,6 +21,7 @@ pub use hash::{
 pub mod cipher;
 pub use cipher::{
     Cipher,
+    BlockSizeIs16,
 };
 
 pub mod mode;

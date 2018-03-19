@@ -8,19 +8,18 @@ use nettle_sys::{
 };
 use std::mem::zeroed;
 use Cipher;
+use BlockSizeIs16;
 use Aead;
 
-pub struct Ccm<C: Cipher> {
+pub struct Ccm<C: Cipher + BlockSizeIs16> {
     cipher: C,
     context: ccm_ctx,
 }
 
-impl<C: Cipher> Ccm<C> {
+impl<C: Cipher + BlockSizeIs16> Ccm<C> {
     pub const DIGEST_SIZE: usize = ::nettle_sys::CCM_DIGEST_SIZE as usize;
 
     pub fn with_key_and_nonce(key: &[u8], nonce: &[u8], ad_len: usize, msg_len: usize, digest_len: usize) -> Self {
-        assert_eq!(C::BLOCK_SIZE, 16);
-
         let mut ctx = unsafe { zeroed() };
         let mut cipher = C::with_encrypt_key(key);
         let enc_func = C::raw_encrypt_function().ptr();
@@ -45,7 +44,7 @@ impl<C: Cipher> Ccm<C> {
     }
 }
 
-impl<C: Cipher> Aead for Ccm<C> {
+impl<C: Cipher + BlockSizeIs16> Aead for Ccm<C> {
     fn digest_size(&self) -> usize {
         ::nettle_sys::CCM_DIGEST_SIZE as usize
     }

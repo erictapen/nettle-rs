@@ -1,3 +1,5 @@
+//! The Digital Signature Algorithm (DSA) described in FIPS 186.
+
 mod signature;
 pub use self::signature::Signature;
 

@@ -1,3 +1,5 @@
+//! Bellare & Rogaways Probabilistic Probabilistic signature schemeSignature Scheme (PSS)
+
 use Result;
 use ::nettle_sys::{
     nettle_mpz_set_str_256_u,
@@ -17,8 +19,11 @@ use Hash;
 use hash::{Sha256,Sha384,Sha512};
 use rsa::{PublicKey,PrivateKey};
 
+/// A hash function usable for PSS.
 pub trait PssHash: Hash {
+    /// Internal to `sign_pss`.
     fn sign<R: Random>(public: &PublicKey, private: &PrivateKey, random: &mut R, salt: &[u8], digest: &[u8], signature: &mut [u8]) -> Result<()>;
+    /// Internal to `verify_pss`.
     fn verify(public: &PublicKey, salt_len: usize, digest: &[u8], signature: &[u8]) -> Result<bool>;
 }
 
@@ -127,6 +132,10 @@ impl PssHash for Sha512 {
     }
 }
 
+/// Signs the message hashed by `hash` using `salt` and the key pair `public`/`private`, producing
+/// `signature`. Expects `signature` to be the size of the modulo of `public`.
+///
+/// The message is signed using PSS.
 pub fn sign_pss<H: PssHash, R: Random>(public: &PublicKey, private: &PrivateKey, salt: &[u8], hash: &mut H, random: &mut R, signature: &mut [u8]) -> Result<()> {
     let mut dst = vec![0u8; hash.digest_size()];
 
@@ -134,6 +143,10 @@ pub fn sign_pss<H: PssHash, R: Random>(public: &PublicKey, private: &PrivateKey,
     H::sign(public,private,random,salt,&dst,signature)
 }
 
+/// Verifies `signature` of the data hashed by `hash` using a salt of `salt_len` bytes and the key
+/// `public`. Returns `true` if the signature is valid.
+///
+/// Expects the message to be PSS encoded.
 pub fn verify_pss<H: PssHash>(public: &PublicKey, salt_len: usize, hash: &mut H, signature: &[u8]) -> Result<bool> {
     let mut dst = vec![0u8; hash.digest_size()];
 

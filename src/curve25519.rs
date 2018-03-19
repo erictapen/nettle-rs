@@ -1,11 +1,18 @@
+//! Elliptic curve Diffie-Hellman using D.J. Bernstein's Curve25519.
+
 use nettle_sys::{
     nettle_curve25519_mul,
     nettle_curve25519_mul_g,
 };
 use Result;
 
+/// Size of the public and secret keys in bytes.
 pub const CURVE25519_SIZE: usize = ::nettle_sys::CURVE25519_SIZE as usize;
 
+/// Derive DH public key.
+///
+/// Computes the public key `q` for a given secret `n`. Returns an error if `q` or `n` are not
+/// `CURVE25519_SIZE` bytes long.
 pub fn mul_g(q: &mut [u8], n: &[u8]) -> Result<()> {
     if q.len() != CURVE25519_SIZE { return Err("Invalid q".into()); }
     if n.len() != CURVE25519_SIZE { return Err("Invalid n".into()); }
@@ -17,6 +24,10 @@ pub fn mul_g(q: &mut [u8], n: &[u8]) -> Result<()> {
     Ok(())
 }
 
+/// Derive DH shared secret.
+///
+/// Computes the shared secret `q` for our secret key `n` and the other parties public key `p`.
+/// Results an error if `q`, `n` or `p` are not `CURVE25519_SIZE` bytes long.
 pub fn mul(q: &mut [u8], n: &[u8], p: &[u8]) -> Result<()> {
     if q.len() != CURVE25519_SIZE { return Err("Invalid q".into()); }
     if n.len() != CURVE25519_SIZE { return Err("Invalid n".into()); }

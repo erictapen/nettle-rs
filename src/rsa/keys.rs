@@ -20,12 +20,15 @@ use std::mem::zeroed;
 use Random;
 use helper::convert_gmpz_to_buffer;
 
+/// A public RSA key.
 pub struct PublicKey {
     pub(crate) context: rsa_public_key,
     pub(crate) modulo_bytes: usize,
 }
 
 impl PublicKey {
+    /// Creates a new RSA public key with the modulo `n` and the public exponent `e`. Both are
+    /// expected to be big endian integers.
     pub fn new(n: &[u8], e: &[u8]) -> Result<PublicKey> {
         unsafe {
             let mut ctx: rsa_public_key = zeroed();
@@ -47,10 +50,12 @@ impl PublicKey {
         }
     }
 
+    /// Returns the modulo as a big endian integer.
     pub fn n(&self) -> Box<[u8]> {
         convert_gmpz_to_buffer(self.context.n[0])
     }
 
+    /// Returns the public exponent as a big endian integer.
     pub fn e(&self) -> Box<[u8]> {
         convert_gmpz_to_buffer(self.context.e[0])
     }
@@ -81,11 +86,14 @@ impl Drop for PublicKey {
     }
 }
 
+/// A private RSA key.
 pub struct PrivateKey {
     pub(crate) context: rsa_private_key,
 }
 
 impl PrivateKey {
+    /// Creates a new private key with the private exponent `d` and the two primes `p`/`q`.
+    /// If the cofactor `co` of `d` to `pq` is `None` the function computes it.
     pub fn new<'a, O: Into<Option<&'a [u8]>>>(d: &[u8], p: &[u8], q: &[u8], co: O) -> Result<Self> {
         unsafe {
             let mut ctx: rsa_private_key = zeroed();
@@ -119,6 +127,9 @@ impl PrivateKey {
         }
     }
 
+    /// Creates a new private key with the two primes `p`/`q`. The private exponent `d` is given as
+    /// `dp = d mod p - 1` and `dq = d mod q - 1`. If the cofactor `co` of `d` to `pq` is `None`
+    /// the function computes it.
     pub fn new_crt<'a, O: Into<Option<&'a [u8]>>>(dp: &[u8], dq: &[u8], p: &[u8], q: &[u8], co: O) -> Result<Self> {
        unsafe {
             let mut ctx: rsa_private_key = zeroed();
@@ -146,6 +157,7 @@ impl PrivateKey {
         }
     }
 
+    /// Returns the primes `p`/`q` as big endian integers.
     pub fn primes(&self) -> (Box<[u8]>,Box<[u8]>) {
         let p = convert_gmpz_to_buffer(self.context.p[0]);
         let q = convert_gmpz_to_buffer(self.context.q[0]);
@@ -153,6 +165,8 @@ impl PrivateKey {
         (p,q)
     }
 
+    /// Returns the private exponent `d` as pair of big endian integers `dp = d mod p - 1` and `dq
+    /// = d mod q - 1`.
     pub fn d_crt(&self) -> (Box<[u8]>,Box<[u8]>) {
         let dp = convert_gmpz_to_buffer(self.context.a[0]);
         let dq = convert_gmpz_to_buffer(self.context.b[0]);
@@ -160,6 +174,7 @@ impl PrivateKey {
         (dp,dq)
     }
 
+    /// Returns the private exponent `d` as big endian integer.
     pub fn d(&self) -> Box<[u8]> {
         convert_gmpz_to_buffer(self.context.d[0])
     }
@@ -189,6 +204,8 @@ impl Drop for PrivateKey {
     }
 }
 
+/// Generates a fresh RSA key pair usable for signing and encryption. The public modulo `n` will be
+/// `modulo_size` bits large. The public exponent is fixed to `0x10001`.
 pub fn generate_keypair<R: Random>(random: &mut R, modulo_size: u32) -> Result<(PublicKey,PrivateKey)> {
     use std::ptr;
 

@@ -1,3 +1,5 @@
+//! D.J. Bernstein's "Twisted" Edwards curve Ed25519.
+
 use nettle_sys::{
     nettle_ed25519_sha512_public_key,
     nettle_ed25519_sha512_sign,
@@ -5,9 +7,14 @@ use nettle_sys::{
 };
 use Result;
 
+/// Size of a public or secret Ed25519 key in bytes.
 pub const ED25519_KEY_SIZE: usize = ::nettle_sys::ED25519_KEY_SIZE as usize;
+
+/// Size of a Ed25519 signature in bytes.
 pub const ED25519_SIGNATURE_SIZE: usize = ::nettle_sys::ED25519_SIGNATURE_SIZE as usize;
 
+/// Computes the `public` key for a given `private` Ed25519 key. Fails if one of the buffer is not
+/// `ED25519_KEY_SIZE` bytes large.
 pub fn public_key(public: &mut [u8], private: &[u8]) -> Result<()> {
     if public.len() != ED25519_KEY_SIZE { return Err("Invalid public key".into()); }
     if private.len() != ED25519_KEY_SIZE { return Err("Invalid private".into()); }
@@ -19,6 +26,9 @@ pub fn public_key(public: &mut [u8], private: &[u8]) -> Result<()> {
     Ok(())
 }
 
+/// Signs the message `msg` using the given `public`/`private`, producing `signature`. Fails if
+/// `public` or `private` is not ED25519_KEY_SIZE bytes large or if `signature` is not
+/// ED25519_SIGNATURE_SIZE bytes.
 pub fn sign(public: &[u8], private: &[u8], msg: &[u8], signature: &mut [u8]) -> Result<()> {
     if public.len() != ED25519_KEY_SIZE { return Err("Invalid public key".into()); }
     if private.len() != ED25519_KEY_SIZE { return Err("Invalid private".into()); }
@@ -31,6 +41,9 @@ pub fn sign(public: &[u8], private: &[u8], msg: &[u8], signature: &mut [u8]) -> 
     Ok(())
 }
 
+/// Verifies `signature` of message `msg` using `public`. Returns `true` if the signature is valid.
+/// Fails if `public` is not ED25519_KEY_SIZE bytes large or `signature` is not
+/// ED25519_SIGNATURE_SIZE bytes.
 pub fn verify(public: &[u8], msg: &[u8], signature: &[u8]) -> Result<bool> {
     if public.len() != ED25519_KEY_SIZE { return Err("Invalid public key".into()); }
     if signature.len() != ED25519_SIGNATURE_SIZE { return Err("Invalid signature buffer".into()); }

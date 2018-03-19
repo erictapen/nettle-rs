@@ -13,17 +13,20 @@ use helper::{
 };
 use Random;
 
+/// Public DSA key.
 pub struct PublicKey {
     pub(crate) public: mpz_t,
 }
 
 impl PublicKey {
+    /// Creates a new public key.
     pub fn new(y: &[u8]) -> PublicKey {
         PublicKey{
             public: [convert_buffer_to_gmpz(y)],
         }
     }
 
+    /// Returns the public key `y` as big endian number.
     pub fn as_bytes(&self) -> Box<[u8]> {
         convert_gmpz_to_buffer(self.public[0])
     }
@@ -48,17 +51,20 @@ impl Drop for PublicKey {
     }
 }
 
+/// Private DSA key.
 pub struct PrivateKey {
     pub(crate) private: mpz_t,
 }
 
 impl PrivateKey {
+    /// Creates a new private key sructure. The secret exponent `x` must be a big endian integer.
     pub fn new(x: &[u8]) -> PrivateKey {
         PrivateKey{
             private: [convert_buffer_to_gmpz(x)],
         }
     }
 
+    /// Returns the secret exponent `x` as bit endian integer.
     pub fn as_bytes(&self) -> Box<[u8]> {
         convert_gmpz_to_buffer(self.private[0])
     }
@@ -83,6 +89,10 @@ impl Drop for PrivateKey {
     }
 }
 
+/// Generates a fresh DSA key pair.
+///
+/// Generator and primes must be supplied via `params`. Entrophy is
+/// gathered using `random`.
 pub fn generate_keypair<R: Random>(params: &Params, random: &mut R) -> (PublicKey,PrivateKey) {
     unsafe {
         let mut public: mpz_t = zeroed();

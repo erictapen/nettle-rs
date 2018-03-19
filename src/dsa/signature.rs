@@ -10,11 +10,13 @@ use helper::{
 };
 use std::mem::zeroed;
 
+/// (EC)DSA signature.
 pub struct Signature {
     pub(crate) signature: dsa_signature,
 }
 
 impl Signature {
+    /// Create a new signature structure. Both `r` and `s` need to be big endian integer.
     pub fn new(r: &[u8], s: &[u8]) -> Signature {
         unsafe {
             let mut ret = zeroed();
@@ -27,10 +29,12 @@ impl Signature {
         }
     }
 
+    /// Returns `r` as big endian integer.
     pub fn r(&self) -> Box<[u8]> {
         convert_gmpz_to_buffer(self.signature.r[0])
     }
 
+    /// Returns `s` as big endian integer.
     pub fn s(&self) -> Box<[u8]> {
         convert_gmpz_to_buffer(self.signature.s[0])
     }

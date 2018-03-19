@@ -10,20 +10,19 @@ use nettle_sys::{
 };
 use std::mem::zeroed;
 use Cipher;
+use BlockSizeIs16;
 use Aead;
 
-pub struct Gcm<C: Cipher> {
+pub struct Gcm<C: Cipher + BlockSizeIs16> {
     cipher: C,
     key: gcm_key,
     context: gcm_ctx,
 }
 
-impl<C: Cipher> Gcm<C> {
+impl<C: Cipher + BlockSizeIs16> Gcm<C> {
     pub const DIGEST_SIZE: usize = ::nettle_sys::GCM_DIGEST_SIZE as usize;
 
     pub fn with_key_and_nonce(key: &[u8], nonce: &[u8]) -> Self {
-        assert_eq!(C::BLOCK_SIZE, 16);
-
         let mut ctx = unsafe { zeroed() };
         let mut key_ctx = unsafe { zeroed() };
         let mut cipher = C::with_encrypt_key(key);
@@ -43,7 +42,7 @@ impl<C: Cipher> Gcm<C> {
     }
 }
 
-impl<C: Cipher> Aead for Gcm<C> {
+impl<C: Cipher + BlockSizeIs16> Aead for Gcm<C> {
     fn digest_size(&self) -> usize {
         ::nettle_sys::GCM_DIGEST_SIZE as usize
     }

@@ -1,3 +1,5 @@
+//! Elliptic curve variant of the Digital Signature Standard.
+
 mod curves;
 pub use self::curves::{
     Curve,

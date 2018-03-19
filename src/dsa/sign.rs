@@ -11,6 +11,8 @@ use super::{
     PrivateKey,
 };
 
+/// Sign `digest` using key `private` and ring `params`. Siging may fail if `digest` is larger than
+/// `q` or not co-prime to `pq`.
 pub fn sign<R: Random>(params: &Params, private: &mut PrivateKey, digest: &[u8], random: &mut R) -> Result<Signature> {
     unsafe {
         let mut ret = zeroed();
@@ -24,6 +26,8 @@ pub fn sign<R: Random>(params: &Params, private: &mut PrivateKey, digest: &[u8],
     }
 }
 
+/// Verifies `signature` of `digest` by `public` over ring `params`. Returns `true` if the
+/// signature is valid.
 pub fn verify(params: &Params, public: &mut PublicKey, digest: &[u8], signature: &Signature) -> bool {
     unsafe {
         nettle_dsa_verify(&params.params, &mut public.public[0], digest.len(), digest.as_ptr(), &signature.signature) == 1

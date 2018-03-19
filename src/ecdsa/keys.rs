@@ -20,11 +20,13 @@ use std::mem::zeroed;
 use helper::convert_buffer_to_gmpz;
 use {Curve,Random,Result};
 
+/// Secret scalar.
 pub struct PrivateKey {
     pub(crate) scalar: ecc_scalar,
 }
 
 impl PrivateKey {
+    /// Creates a new private scalar based on the big endian integer `num`.
     pub fn new<C: Curve>(num: &[u8]) -> Result<PrivateKey> {
         unsafe {
             let mut scalar: ecc_scalar = zeroed();
@@ -47,6 +49,7 @@ impl PrivateKey {
         }
     }
 
+    /// Returns the private scalar as big endian integer.
     pub fn as_bytes(&self) -> Box<[u8]> {
         unsafe {
             let mut mpz = zeroed();
@@ -88,11 +91,14 @@ impl Drop for PrivateKey {
     }
 }
 
+/// Public point.
 pub struct PublicKey {
     pub(crate) point: ecc_point,
 }
 
 impl PublicKey {
+    /// Creates a new point on `C` with coordinates `x` & `y`. Can fail if the given point is not
+    /// on the curve.
     pub fn new<C: Curve>(x: &[u8], y: &[u8]) -> Result<PublicKey> {
         unsafe {
             let mut point: ecc_point = zeroed();
@@ -120,6 +126,7 @@ impl PublicKey {
         }
     }
 
+    /// Returns the points coordinates as big endian integers.
     pub fn as_bytes(&self) -> (Box<[u8]>,Box<[u8]>) {
         unsafe {
             let mut x_mpz = zeroed();
@@ -169,6 +176,7 @@ impl Drop for PublicKey {
     }
 }
 
+/// Generates a new ECDSA key pair for siging.
 pub fn generate_keypair<C: Curve, R: Random>(random: &mut R) -> Result<(PublicKey,PrivateKey)> {
     unsafe {
         let mut point = zeroed();
