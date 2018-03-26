@@ -3,7 +3,7 @@ use nettle_sys::{
     nettle_dsa_verify,
 };
 use std::mem::zeroed;
-use {Random,Result};
+use {Random,Result,Error};
 use super::{
     Signature,
     Params,
@@ -22,7 +22,7 @@ pub fn sign<R: Random>(params: &Params, private: &PrivateKey, digest: &[u8], ran
         if res == 1 {
             Ok(Signature{ signature: ret })
         } else {
-            Err("Signing failed".into())
+            Err(Error::SigningFailed)
         }
     }
 }

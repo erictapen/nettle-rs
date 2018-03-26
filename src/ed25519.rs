@@ -5,7 +5,10 @@ use nettle_sys::{
     nettle_ed25519_sha512_sign,
     nettle_ed25519_sha512_verify,
 };
-use Result;
+use {
+    Result,
+    Error,
+};
 
 /// Size of a public or secret Ed25519 key in bytes.
 pub const ED25519_KEY_SIZE: usize = ::nettle_sys::ED25519_KEY_SIZE as usize;
@@ -16,8 +19,12 @@ pub const ED25519_SIGNATURE_SIZE: usize = ::nettle_sys::ED25519_SIGNATURE_SIZE a
 /// Computes the `public` key for a given `private` Ed25519 key. Fails if one of the buffer is not
 /// `ED25519_KEY_SIZE` bytes large.
 pub fn public_key(public: &mut [u8], private: &[u8]) -> Result<()> {
-    if public.len() != ED25519_KEY_SIZE { return Err("Invalid public key".into()); }
-    if private.len() != ED25519_KEY_SIZE { return Err("Invalid private".into()); }
+    if public.len() != ED25519_KEY_SIZE {
+        return Err(Error::InvalidArgument{ argument_name: "public" });
+    }
+    if private.len() != ED25519_KEY_SIZE {
+        return Err(Error::InvalidArgument{ argument_name: "private" });
+    }
 
     unsafe {
         nettle_ed25519_sha512_public_key(public.as_mut_ptr(), private.as_ptr());
@@ -30,9 +37,15 @@ pub fn public_key(public: &mut [u8], private: &[u8]) -> Result<()> {
 /// `public` or `private` is not ED25519_KEY_SIZE bytes large or if `signature` is not
 /// ED25519_SIGNATURE_SIZE bytes.
 pub fn sign(public: &[u8], private: &[u8], msg: &[u8], signature: &mut [u8]) -> Result<()> {
-    if public.len() != ED25519_KEY_SIZE { return Err("Invalid public key".into()); }
-    if private.len() != ED25519_KEY_SIZE { return Err("Invalid private".into()); }
-    if signature.len() != ED25519_SIGNATURE_SIZE { return Err("Invalid signature buffer".into()); }
+    if public.len() != ED25519_KEY_SIZE {
+        return Err(Error::InvalidArgument{ argument_name: "public" });
+    }
+    if private.len() != ED25519_KEY_SIZE {
+        return Err(Error::InvalidArgument{ argument_name: "private" });
+    }
+    if signature.len() != ED25519_SIGNATURE_SIZE {
+        return Err(Error::InvalidArgument{ argument_name: "signature" });
+    }
 
     unsafe {
         nettle_ed25519_sha512_sign(public.as_ptr(), private.as_ptr(), msg.len(), msg.as_ptr(), signature.as_mut_ptr());
@@ -45,8 +58,12 @@ pub fn sign(public: &[u8], private: &[u8], msg: &[u8], signature: &mut [u8]) -> 
 /// Fails if `public` is not ED25519_KEY_SIZE bytes large or `signature` is not
 /// ED25519_SIGNATURE_SIZE bytes.
 pub fn verify(public: &[u8], msg: &[u8], signature: &[u8]) -> Result<bool> {
-    if public.len() != ED25519_KEY_SIZE { return Err("Invalid public key".into()); }
-    if signature.len() != ED25519_SIGNATURE_SIZE { return Err("Invalid signature buffer".into()); }
+    if public.len() != ED25519_KEY_SIZE {
+        return Err(Error::InvalidArgument{ argument_name: "public" });
+    }
+    if signature.len() != ED25519_SIGNATURE_SIZE {
+        return Err(Error::InvalidArgument{ argument_name: "signature" });
+    }
 
     unsafe {
         Ok(nettle_ed25519_sha512_verify(public.as_ptr(), msg.len(), msg.as_ptr(), signature.as_ptr()) == 1)

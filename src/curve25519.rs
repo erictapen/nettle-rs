@@ -4,7 +4,10 @@ use nettle_sys::{
     nettle_curve25519_mul,
     nettle_curve25519_mul_g,
 };
-use Result;
+use {
+    Result,
+    Error,
+};
 
 /// Size of the public and secret keys in bytes.
 pub const CURVE25519_SIZE: usize = ::nettle_sys::CURVE25519_SIZE as usize;
@@ -14,8 +17,12 @@ pub const CURVE25519_SIZE: usize = ::nettle_sys::CURVE25519_SIZE as usize;
 /// Computes the public key `q` for a given secret `n`. Returns an error if `q` or `n` are not
 /// `CURVE25519_SIZE` bytes long.
 pub fn mul_g(q: &mut [u8], n: &[u8]) -> Result<()> {
-    if q.len() != CURVE25519_SIZE { return Err("Invalid q".into()); }
-    if n.len() != CURVE25519_SIZE { return Err("Invalid n".into()); }
+    if q.len() != CURVE25519_SIZE {
+        return Err(Error::InvalidArgument{ argument_name: "q" });
+    }
+    if n.len() != CURVE25519_SIZE {
+        return Err(Error::InvalidArgument{ argument_name: "n" });
+    }
 
     unsafe {
         nettle_curve25519_mul_g(q.as_mut_ptr(), n.as_ptr());
@@ -29,9 +36,15 @@ pub fn mul_g(q: &mut [u8], n: &[u8]) -> Result<()> {
 /// Computes the shared secret `q` for our secret key `n` and the other parties public key `p`.
 /// Results an error if `q`, `n` or `p` are not `CURVE25519_SIZE` bytes long.
 pub fn mul(q: &mut [u8], n: &[u8], p: &[u8]) -> Result<()> {
-    if q.len() != CURVE25519_SIZE { return Err("Invalid q".into()); }
-    if n.len() != CURVE25519_SIZE { return Err("Invalid n".into()); }
-    if p.len() != CURVE25519_SIZE { return Err("Invalid p".into()); }
+    if q.len() != CURVE25519_SIZE {
+        return Err(Error::InvalidArgument{ argument_name: "q" });
+    }
+    if n.len() != CURVE25519_SIZE {
+        return Err(Error::InvalidArgument{ argument_name: "n" });
+    }
+    if p.len() != CURVE25519_SIZE {
+        return Err(Error::InvalidArgument{ argument_name: "p" });
+    }
 
     unsafe {
         nettle_curve25519_mul(q.as_mut_ptr(), n.as_ptr(), p.as_ptr());

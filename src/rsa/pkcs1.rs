@@ -1,6 +1,9 @@
 //! Encryption and siging using PKCS#1.
 
-use Result;
+use {
+    Result,
+    Error,
+};
 use ::nettle_sys::{
     nettle_mpz_set_str_256_u,
     nettle_mpz_get_str_256,
@@ -92,7 +95,7 @@ fn sign_digest_pkcs1<R: Random>(public: &PublicKey, private: &PrivateKey, digest
         } else {
             __gmpz_clear(&mut sig);
 
-            Err("Signing failed".into())
+            Err(Error::SigningFailed)
         }
     }
 }
@@ -155,7 +158,7 @@ pub fn encrypt_pkcs1<R: Random>(public: &PublicKey, random: &mut R, plaintext: &
         } else {
             __gmpz_clear(&mut out);
 
-            Err("Encryption failed".into())
+            Err(Error::EncryptionFailed)
         }
     }
 }
@@ -180,7 +183,7 @@ pub fn decrypt_pkcs1<R: Random>(public: &PublicKey, private: &PrivateKey, random
             buf.truncate(buf_len);
             Ok(buf.into())
         } else {
-            Err("Decryption failed".into())
+            Err(Error::DecryptionFailed)
         }
     }
 }

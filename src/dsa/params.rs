@@ -12,6 +12,7 @@ use helper::{
 use std::ptr;
 use std::mem::zeroed;
 use {
+    Error,
     Random,
     Result
 };
@@ -52,7 +53,7 @@ impl Params {
             if nettle_dsa_generate_params(&mut ret as *mut _, random.context(), Some(R::random), ptr::null_mut(), None, p_bits as u32, q_bits as u32) == 1 {
                 Ok(Params{ params: ret })
             } else {
-                Err("Invalid q_bits and or p_bits values".into())
+                Err(Error::InvalidBitSizes)
             }
         }
     }

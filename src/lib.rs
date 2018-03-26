@@ -6,12 +6,13 @@ extern crate nettle_sys;
 extern crate libc;
 extern crate rand;
 #[macro_use]
-extern crate error_chain;
+extern crate failure;
 
-mod errors {
-    error_chain! { }
-}
-use errors::*;
+mod errors;
+pub use errors::{
+    Result,
+    Error,
+};
 
 mod helper;
 

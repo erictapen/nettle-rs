@@ -1,6 +1,9 @@
 //! Bellare & Rogaways Probabilistic Probabilistic signature schemeSignature Scheme (PSS)
 
-use Result;
+use {
+    Result,
+    Error,
+};
 use ::nettle_sys::{
     nettle_mpz_set_str_256_u,
     nettle_mpz_get_str_256,
@@ -42,7 +45,7 @@ impl PssHash for Sha256 {
             } else {
                 __gmpz_clear(&mut sig);
 
-                Err("Signing failed".into())
+                Err(Error::SigningFailed)
             }
         }
     }
@@ -77,7 +80,7 @@ impl PssHash for Sha384 {
             } else {
                 __gmpz_clear(&mut sig);
 
-                Err("Signing failed".into())
+                Err(Error::SigningFailed)
             }
         }
     }
@@ -112,7 +115,7 @@ impl PssHash for Sha512 {
             } else {
                 __gmpz_clear(&mut sig);
 
-                Err("Signing failed".into())
+                Err(Error::SigningFailed)
             }
         }
     }

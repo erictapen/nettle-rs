@@ -18,6 +18,7 @@ use ::nettle_sys::{
 };
 use std::mem::zeroed;
 use helper::convert_buffer_to_gmpz;
+use errors::Error;
 use {Curve,Random,Result};
 
 /// Secret scalar.
@@ -44,7 +45,7 @@ impl PrivateKey {
             } else {
                 __gmpz_clear(&mut mpz as *mut _);
 
-                Err("Invalid num".into())
+                Err(Error::InvalidArgument{ argument_name: "num" })
             }
         }
     }
@@ -121,7 +122,7 @@ impl PublicKey {
                 __gmpz_clear(&mut x_mpz as *mut _);
                 __gmpz_clear(&mut y_mpz as *mut _);
 
-                Err("Invalid coordinates".into())
+                Err(Error::InvalidArgument{ argument_name: "x or y" })
             }
         }
     }

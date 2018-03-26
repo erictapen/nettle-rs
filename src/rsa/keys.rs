@@ -1,4 +1,7 @@
-use Result;
+use {
+    Result,
+    Error,
+};
 use ::nettle_sys::{
     rsa_public_key,
     nettle_rsa_public_key_init,
@@ -45,7 +48,7 @@ impl PublicKey {
             if nettle_rsa_public_key_prepare(&mut ret.context as *mut _) == 1 {
                 Ok(ret)
             } else {
-                Err("Invalid RSA key".into())
+                Err(Error::InvalidArgument{ argument_name: "" })
             }
         }
     }
@@ -122,7 +125,7 @@ impl PrivateKey {
             if nettle_rsa_private_key_prepare(&mut ret.context as *mut _) == 1 {
                 Ok(ret)
             } else {
-                Err("Invalid RSA key".into())
+                Err(Error::InvalidArgument{ argument_name: "" })
             }
         }
     }
@@ -152,7 +155,7 @@ impl PrivateKey {
             if nettle_rsa_private_key_prepare(&mut ret.context as *mut _) == 1 {
                 Ok(ret)
             } else {
-                Err("Invalid RSA key".into())
+                Err(Error::InvalidArgument{ argument_name: "" })
             }
         }
     }
@@ -224,7 +227,7 @@ pub fn generate_keypair<R: Random>(random: &mut R, modulo_size: u32) -> Result<(
         } else {
             nettle_rsa_public_key_clear(&mut public_ctx as *mut _);
             nettle_rsa_private_key_clear(&mut private_ctx as *mut _);
-            Err("Key generation failed".into())
+            Err(Error::KeyGenerationFailed)
         }
     }
 }
