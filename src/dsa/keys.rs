@@ -114,7 +114,7 @@ pub fn generate_keypair<R: Random>(params: &Params, random: &mut R) -> (PublicKe
 mod tests {
     use super::*;
     use Yarrow;
-    use dsa::Params;
+    use dsa::{sign,verify,Params};
 
     #[test]
     fn generate_key() {
@@ -124,5 +124,23 @@ mod tests {
         for _ in 0..3 {
             let _ = generate_keypair(&params,&mut rand);
         }
+    }
+
+    #[test]
+    fn clone() {
+        let mut rand = Yarrow::default();
+        let params = Params::generate(&mut rand,1024,160).unwrap();
+        let (public,private) = generate_keypair(&params,&mut rand);
+
+        let public = public.clone();
+        let private = private.clone();
+        let params = params.clone();
+        let mut msg = [0u8; 160];
+
+        rand.random(&mut msg);
+        let sig = sign(&params, &private, &msg, &mut rand).unwrap();
+        let sig = sig.clone();
+
+        assert!(verify(&params, &public, &msg, &sig));
     }
 }

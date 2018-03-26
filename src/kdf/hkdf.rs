@@ -7,6 +7,9 @@ use Mac;
 use mac::Hmac;
 use hash::NettleHash;
 
+/// H. Krawczyks HMAC-based key derivation function (RFC 5869).
+///
+/// Derives `key` from `secret`, public `salt` and optional context `info`.
 pub fn hkdf<H: NettleHash>(secret: &[u8], salt: &[u8], info: &[u8], key: &mut [u8]) {
     let mut extract = Hmac::<H>::with_key(salt);
     let mut digest = vec![0u8; extract.mac_size()];

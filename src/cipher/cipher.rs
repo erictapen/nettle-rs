@@ -16,6 +16,7 @@ pub struct RawCipherFunctionPointer {
 }
 
 impl RawCipherFunctionPointer {
+    #[doc(hidden)]
     pub fn new<T>(f: unsafe extern "C" fn(T, usize, *mut u8, *const u8)) -> Self {
         let ret: extern "C" fn(*const c_void, usize, *mut u8, *const u8) = unsafe {
             ::std::mem::transmute(f as *const c_void)
@@ -23,6 +24,7 @@ impl RawCipherFunctionPointer {
         RawCipherFunctionPointer{ inner: Some(ret) }
     }
 
+    #[doc(hidden)]
     pub fn ptr(&self) -> Option<unsafe extern "C" fn(*const c_void, usize, *mut u8, *const u8)> {
         self.inner
     }

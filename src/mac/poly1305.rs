@@ -11,11 +11,13 @@ use nettle_sys::{
 use Mac;
 use std::mem::zeroed;
 
+/// D.J. Bernsteins Poly1305-AES message authentication code (RFC 7539).
 pub struct Poly1305 {
     context: poly1305_aes_ctx,
 }
 
 impl Poly1305 {
+    /// Create a new MAC instance with secret `key` and public `nonce`.
     pub fn with_key_and_nonce(key: &[u8], nonce: &[u8]) -> Self {
         assert_eq!(key.len(), POLY1305_AES_KEY_SIZE as usize);
         assert_eq!(nonce.len(), POLY1305_AES_NONCE_SIZE as usize);

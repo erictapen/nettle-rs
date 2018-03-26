@@ -286,4 +286,14 @@ mod tests {
         assert!(generate_keypair(&mut rng,2048).is_ok());
         assert!(generate_keypair(&mut rng,4096).is_ok());
     }
+
+    #[test]
+    fn clone() {
+        use random::Yarrow;
+
+        let mut rng = Yarrow::default();
+        let (public,private) = generate_keypair(&mut rng,1024).unwrap();
+        let _ = public.clone();
+        let _ = private.clone();
+    }
 }

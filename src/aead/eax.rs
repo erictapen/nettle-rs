@@ -12,6 +12,7 @@ use std::mem::zeroed;
 use Cipher;
 use Aead;
 
+/// M.Bellare et.al EAX mode of operation.
 pub struct Eax<C: Cipher> {
     cipher: C,
     key: eax_key,
@@ -19,8 +20,10 @@ pub struct Eax<C: Cipher> {
 }
 
 impl<C: Cipher> Eax<C> {
+    /// Size of a EAX digest in bytes.
     pub const DIGEST_SIZE: usize = ::nettle_sys::EAX_DIGEST_SIZE as usize;
 
+    /// Creates a new EAX instance with secret `key` and public `nonce`.
     pub fn with_key_and_nonce(key: &[u8], nonce: &[u8]) -> Self {
         assert_eq!(C::BLOCK_SIZE, 16);
 

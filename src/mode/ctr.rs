@@ -4,21 +4,26 @@ use nettle_sys::{
 use Cipher;
 use Mode;
 
+/// Counter mode.
 pub struct Ctr<C: Cipher> {
     cipher: C,
 }
 
 impl<C: Cipher> Ctr<C> {
+    /// Create a new encrypting CTR instance with `key`.
     pub fn with_encrypt_key(key: &[u8]) -> Self {
         Ctr{ cipher: C::with_encrypt_key(key) }
     }
 
+    /// Create a new decrypting CTR instance with `key`.
     pub fn with_decrypt_key(key: &[u8]) -> Self {
         Ctr{ cipher: C::with_encrypt_key(key) }
     }
 }
 
 impl<C: Cipher> Mode for Ctr<C> {
+    fn block_size(&self) -> usize { C::BLOCK_SIZE }
+
     fn encrypt(&mut self, iv: &mut [u8], dst: &mut [u8], src: &[u8]) {
         assert_eq!(dst.len(), src.len());
         unsafe {

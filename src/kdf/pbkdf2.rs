@@ -6,6 +6,9 @@ use Mac;
 use mac::Hmac;
 use hash::NettleHash;
 
+/// Password-based Key derivation function 2 (RFC 6070).
+///
+/// Derives `key` from a secret `password` and a public `salt`.
 pub fn pbkdf2<H: NettleHash>(password: &[u8], salt: &[u8], iterations: u32, key: &mut [u8]) {
     let mut hmac = Hmac::<H>::with_key(password);
 

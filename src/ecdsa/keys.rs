@@ -196,6 +196,7 @@ pub fn generate_keypair<C: Curve, R: Random>(random: &mut R) -> Result<(PublicKe
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ecdsa::{sign,verify};
     use Yarrow;
     use Secp192r1;
 
@@ -206,5 +207,18 @@ mod tests {
         for _ in 0..3 {
             let _ = generate_keypair::<Secp192r1,_>(&mut rand).unwrap();
         }
+    }
+
+    #[test]
+    fn clone() {
+        let mut rand = Yarrow::default();
+        let (public,private) = generate_keypair::<Secp192r1,_>(&mut rand).unwrap();
+        let mut msg = [0u8; 160];
+
+        rand.random(&mut msg);
+        let sig = sign(&private, &msg, &mut rand);
+        let sig = sig.clone();
+
+        assert!(verify(&public, &msg, &sig));
     }
 }

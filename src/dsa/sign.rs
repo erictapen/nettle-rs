@@ -13,10 +13,11 @@ use super::{
 
 /// Sign `digest` using key `private` and ring `params`. Siging may fail if `digest` is larger than
 /// `q` or not co-prime to `pq`.
-pub fn sign<R: Random>(params: &Params, private: &mut PrivateKey, digest: &[u8], random: &mut R) -> Result<Signature> {
+pub fn sign<R: Random>(params: &Params, private: &PrivateKey, digest: &[u8], random: &mut R) -> Result<Signature> {
     unsafe {
         let mut ret = zeroed();
-        let res = nettle_dsa_sign(&params.params, &mut private.private[0], random.context(), Some(R::random), digest.len(), digest.as_ptr(), &mut ret as *mut _);
+        let mut private = private.private[0].clone();
+        let res = nettle_dsa_sign(&params.params, &mut private, random.context(), Some(R::random), digest.len(), digest.as_ptr(), &mut ret as *mut _);
 
         if res == 1 {
             Ok(Signature{ signature: ret })
@@ -28,9 +29,10 @@ pub fn sign<R: Random>(params: &Params, private: &mut PrivateKey, digest: &[u8],
 
 /// Verifies `signature` of `digest` by `public` over ring `params`. Returns `true` if the
 /// signature is valid.
-pub fn verify(params: &Params, public: &mut PublicKey, digest: &[u8], signature: &Signature) -> bool {
+pub fn verify(params: &Params, public: &PublicKey, digest: &[u8], signature: &Signature) -> bool {
     unsafe {
-        nettle_dsa_verify(&params.params, &mut public.public[0], digest.len(), digest.as_ptr(), &signature.signature) == 1
+        let mut public = public.public[0].clone();
+        nettle_dsa_verify(&params.params, &mut public, digest.len(), digest.as_ptr(), &signature.signature) == 1
     }
 }
 

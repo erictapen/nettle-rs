@@ -5,21 +5,26 @@ use nettle_sys::{
 use Cipher;
 use Mode;
 
+/// Cipher block chaining mode.
 pub struct Cbc<C: Cipher> {
     cipher: C,
 }
 
 impl<C: Cipher> Cbc<C> {
+    /// Create a new encrypting CBC instance with `key`.
     pub fn with_encrypt_key(key: &[u8]) -> Self {
         Cbc{ cipher: C::with_encrypt_key(key) }
     }
 
+    /// Create a new decrypting CBC instance with `key`.
     pub fn with_decrypt_key(key: &[u8]) -> Self {
         Cbc{ cipher: C::with_decrypt_key(key) }
     }
 }
 
 impl<C: Cipher> Mode for Cbc<C> {
+    fn block_size(&self) -> usize { C::BLOCK_SIZE }
+
     fn encrypt(&mut self, iv: &mut [u8], dst: &mut [u8], src: &[u8]) {
         assert_eq!(dst.len(), src.len());
         unsafe {

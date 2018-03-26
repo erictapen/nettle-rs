@@ -5,21 +5,26 @@ use nettle_sys::{
 use Cipher;
 use Mode;
 
+/// Cipher feedback mode.
 pub struct Cfb<C: Cipher> {
     cipher: C,
 }
 
 impl<C: Cipher> Cfb<C> {
+    /// Create a new encrypting CFB instance with `key`.
     pub fn with_encrypt_key(key: &[u8]) -> Self {
         Cfb{ cipher: C::with_encrypt_key(key) }
     }
 
+    /// Create a new decrypting CFB instance with `key`.
     pub fn with_decrypt_key(key: &[u8]) -> Self {
         Cfb{ cipher: C::with_encrypt_key(key) }
     }
 }
 
 impl<C: Cipher> Mode for Cfb<C> {
+    fn block_size(&self) -> usize { C::BLOCK_SIZE }
+
     fn encrypt(&mut self, iv: &mut [u8], dst: &mut [u8], src: &[u8]) {
         assert_eq!(dst.len(), src.len());
         unsafe {

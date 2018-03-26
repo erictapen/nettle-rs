@@ -34,25 +34,25 @@ mod tests {
     #[test]
     fn sign_verify() {
         let mut rand = Yarrow::default();
-        let (mut public,mut private) = generate_keypair::<Secp192r1,_>(&mut rand).unwrap();
+        let (public,private) = generate_keypair::<Secp192r1,_>(&mut rand).unwrap();
 
         for _ in 0..3 {
             let mut msg = [0u8; 160];
 
             rand.random(&mut msg);
-            let sig = sign(&mut private, &msg, &mut rand);
+            let sig = sign(&private, &msg, &mut rand);
 
-            assert!(verify(&mut public, &msg, &sig));
+            assert!(verify(&public, &msg, &sig));
         }
 
         for _ in 0..3 {
             let mut msg = [0u8; 160];
 
             rand.random(&mut msg);
-            let sig = sign(&mut private, &msg, &mut rand);
+            let sig = sign(&private, &msg, &mut rand);
             rand.random(&mut msg);
 
-            assert!(!verify(&mut public, &msg, &sig));
+            assert!(!verify(&public, &msg, &sig));
         }
     }
 }

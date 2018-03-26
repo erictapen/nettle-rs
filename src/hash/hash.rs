@@ -18,6 +18,7 @@ pub trait Hash {
 
 /// Nettle context a.k.a. `<hash>_ctx` of this hash
 pub trait NettleHash: Hash + Default {
+    #[doc(hidden)]
     type Context: Sized;
 
     /// Pointer to the `nettle_hash` structure for this hash.

@@ -13,6 +13,7 @@ use Cipher;
 use BlockSizeIs16;
 use Aead;
 
+/// Galois/Counter mode (NIST SP800-38D).
 pub struct Gcm<C: Cipher + BlockSizeIs16> {
     cipher: C,
     key: gcm_key,
@@ -20,8 +21,10 @@ pub struct Gcm<C: Cipher + BlockSizeIs16> {
 }
 
 impl<C: Cipher + BlockSizeIs16> Gcm<C> {
+    /// Size of a GCM digest in bytes.
     pub const DIGEST_SIZE: usize = ::nettle_sys::GCM_DIGEST_SIZE as usize;
 
+    /// Creates a new GCM instance with secret `key` and public `nonce`.
     pub fn with_key_and_nonce(key: &[u8], nonce: &[u8]) -> Self {
         let mut ctx = unsafe { zeroed() };
         let mut key_ctx = unsafe { zeroed() };

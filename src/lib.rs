@@ -1,3 +1,5 @@
+//! Nettle bindings
+
 #![warn(missing_docs)]
 
 extern crate nettle_sys;

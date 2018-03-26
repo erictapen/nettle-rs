@@ -10,6 +10,7 @@ use std::os::raw::c_void;
 use std::slice;
 use libc::size_t;
 
+/// Hashed message authentication code.
 pub struct Hmac<H: Hash + NettleHash> {
     outer: H::Context,
     inner: H::Context,
@@ -17,6 +18,7 @@ pub struct Hmac<H: Hash + NettleHash> {
 }
 
 impl<H: NettleHash> Hmac<H> {
+    /// Create a new MAC instance with secret `key`.
     pub fn with_key(key: &[u8]) -> Self {
         unsafe {
             let mut ret: Hmac<H> = zeroed();
@@ -32,6 +34,7 @@ impl<H: NettleHash> Hmac<H> {
         }
     }
 
+    #[doc(hidden)]
     pub extern "C" fn nettle_update(ctx: *mut c_void, length: size_t, src: *const u8) {
         unsafe {
             let ctx: &mut Hmac<H> = transmute(ctx);
@@ -41,6 +44,7 @@ impl<H: NettleHash> Hmac<H> {
         }
     }
 
+    #[doc(hidden)]
     pub extern "C" fn nettle_digest(ctx: *mut c_void, length: size_t, dst: *mut u8) {
         unsafe {
             let ctx: &mut Hmac<H> = transmute(ctx);

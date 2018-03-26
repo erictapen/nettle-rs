@@ -11,14 +11,21 @@ use Cipher;
 use BlockSizeIs16;
 use Aead;
 
+/// Counter with CBC-MAC mode (NIST SP800-38C).
+///
+/// CCM is a generic AEAD mode for block cipher with 128 bit block size.
 pub struct Ccm<C: Cipher + BlockSizeIs16> {
     cipher: C,
     context: ccm_ctx,
 }
 
 impl<C: Cipher + BlockSizeIs16> Ccm<C> {
+    /// Recommended size of the CCM digest in bytes.
     pub const DIGEST_SIZE: usize = ::nettle_sys::CCM_DIGEST_SIZE as usize;
 
+    /// Creates a new instance with secret `key` and public `nonce`. The instance expect additional
+    /// data of `ad_len` bytes, a overall message of `msg_len` and will produce a digest of
+    /// `digest_len` bytes.
     pub fn with_key_and_nonce(key: &[u8], nonce: &[u8], ad_len: usize, msg_len: usize, digest_len: usize) -> Self {
         let mut ctx = unsafe { zeroed() };
         let mut cipher = C::with_encrypt_key(key);
