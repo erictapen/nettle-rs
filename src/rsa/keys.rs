@@ -48,7 +48,7 @@ impl PublicKey {
             if nettle_rsa_public_key_prepare(&mut ret.context as *mut _) == 1 {
                 Ok(ret)
             } else {
-                Err(Error::InvalidArgument{ argument_name: "" })
+                Err(Error::InvalidArgument{ argument_name: "" }.into())
             }
         }
     }
@@ -125,7 +125,7 @@ impl PrivateKey {
             if nettle_rsa_private_key_prepare(&mut ret.context as *mut _) == 1 {
                 Ok(ret)
             } else {
-                Err(Error::InvalidArgument{ argument_name: "" })
+                Err(Error::InvalidArgument{ argument_name: "" }.into())
             }
         }
     }
@@ -155,7 +155,7 @@ impl PrivateKey {
             if nettle_rsa_private_key_prepare(&mut ret.context as *mut _) == 1 {
                 Ok(ret)
             } else {
-                Err(Error::InvalidArgument{ argument_name: "" })
+                Err(Error::InvalidArgument{ argument_name: "" }.into())
             }
         }
     }
@@ -227,7 +227,7 @@ pub fn generate_keypair<R: Random>(random: &mut R, modulo_size: u32) -> Result<(
         } else {
             nettle_rsa_public_key_clear(&mut public_ctx as *mut _);
             nettle_rsa_private_key_clear(&mut private_ctx as *mut _);
-            Err(Error::KeyGenerationFailed)
+            Err(Error::KeyGenerationFailed.into())
         }
     }
 }

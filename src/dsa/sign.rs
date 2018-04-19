@@ -22,7 +22,7 @@ pub fn sign<R: Random>(params: &Params, private: &PrivateKey, digest: &[u8], ran
         if res == 1 {
             Ok(Signature{ signature: ret })
         } else {
-            Err(Error::SigningFailed)
+            Err(Error::SigningFailed.into())
         }
     }
 }

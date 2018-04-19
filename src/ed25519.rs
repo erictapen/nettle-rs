@@ -20,10 +20,10 @@ pub const ED25519_SIGNATURE_SIZE: usize = ::nettle_sys::ED25519_SIGNATURE_SIZE a
 /// `ED25519_KEY_SIZE` bytes large.
 pub fn public_key(public: &mut [u8], private: &[u8]) -> Result<()> {
     if public.len() != ED25519_KEY_SIZE {
-        return Err(Error::InvalidArgument{ argument_name: "public" });
+        return Err(Error::InvalidArgument{ argument_name: "public" }.into());
     }
     if private.len() != ED25519_KEY_SIZE {
-        return Err(Error::InvalidArgument{ argument_name: "private" });
+        return Err(Error::InvalidArgument{ argument_name: "private" }.into());
     }
 
     unsafe {
@@ -38,13 +38,13 @@ pub fn public_key(public: &mut [u8], private: &[u8]) -> Result<()> {
 /// ED25519_SIGNATURE_SIZE bytes.
 pub fn sign(public: &[u8], private: &[u8], msg: &[u8], signature: &mut [u8]) -> Result<()> {
     if public.len() != ED25519_KEY_SIZE {
-        return Err(Error::InvalidArgument{ argument_name: "public" });
+        return Err(Error::InvalidArgument{ argument_name: "public" }.into());
     }
     if private.len() != ED25519_KEY_SIZE {
-        return Err(Error::InvalidArgument{ argument_name: "private" });
+        return Err(Error::InvalidArgument{ argument_name: "private" }.into());
     }
     if signature.len() != ED25519_SIGNATURE_SIZE {
-        return Err(Error::InvalidArgument{ argument_name: "signature" });
+        return Err(Error::InvalidArgument{ argument_name: "signature" }.into());
     }
 
     unsafe {
@@ -59,10 +59,10 @@ pub fn sign(public: &[u8], private: &[u8], msg: &[u8], signature: &mut [u8]) -> 
 /// ED25519_SIGNATURE_SIZE bytes.
 pub fn verify(public: &[u8], msg: &[u8], signature: &[u8]) -> Result<bool> {
     if public.len() != ED25519_KEY_SIZE {
-        return Err(Error::InvalidArgument{ argument_name: "public" });
+        return Err(Error::InvalidArgument{ argument_name: "public" }.into());
     }
     if signature.len() != ED25519_SIGNATURE_SIZE {
-        return Err(Error::InvalidArgument{ argument_name: "signature" });
+        return Err(Error::InvalidArgument{ argument_name: "signature" }.into());
     }
 
     unsafe {

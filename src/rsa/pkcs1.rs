@@ -95,7 +95,7 @@ fn sign_digest_pkcs1<R: Random>(public: &PublicKey, private: &PrivateKey, digest
         } else {
             __gmpz_clear(&mut sig);
 
-            Err(Error::SigningFailed)
+            Err(Error::SigningFailed.into())
         }
     }
 }
@@ -158,7 +158,7 @@ pub fn encrypt_pkcs1<R: Random>(public: &PublicKey, random: &mut R, plaintext: &
         } else {
             __gmpz_clear(&mut out);
 
-            Err(Error::EncryptionFailed)
+            Err(Error::EncryptionFailed.into())
         }
     }
 }
@@ -183,7 +183,7 @@ pub fn decrypt_pkcs1<R: Random>(public: &PublicKey, private: &PrivateKey, random
             buf.truncate(buf_len);
             Ok(buf.into())
         } else {
-            Err(Error::DecryptionFailed)
+            Err(Error::DecryptionFailed.into())
         }
     }
 }

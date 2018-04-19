@@ -18,10 +18,10 @@ pub const CURVE25519_SIZE: usize = ::nettle_sys::CURVE25519_SIZE as usize;
 /// `CURVE25519_SIZE` bytes long.
 pub fn mul_g(q: &mut [u8], n: &[u8]) -> Result<()> {
     if q.len() != CURVE25519_SIZE {
-        return Err(Error::InvalidArgument{ argument_name: "q" });
+        return Err(Error::InvalidArgument{ argument_name: "q" }.into());
     }
     if n.len() != CURVE25519_SIZE {
-        return Err(Error::InvalidArgument{ argument_name: "n" });
+        return Err(Error::InvalidArgument{ argument_name: "n" }.into());
     }
 
     unsafe {
@@ -37,13 +37,13 @@ pub fn mul_g(q: &mut [u8], n: &[u8]) -> Result<()> {
 /// Results an error if `q`, `n` or `p` are not `CURVE25519_SIZE` bytes long.
 pub fn mul(q: &mut [u8], n: &[u8], p: &[u8]) -> Result<()> {
     if q.len() != CURVE25519_SIZE {
-        return Err(Error::InvalidArgument{ argument_name: "q" });
+        return Err(Error::InvalidArgument{ argument_name: "q" }.into());
     }
     if n.len() != CURVE25519_SIZE {
-        return Err(Error::InvalidArgument{ argument_name: "n" });
+        return Err(Error::InvalidArgument{ argument_name: "n" }.into());
     }
     if p.len() != CURVE25519_SIZE {
-        return Err(Error::InvalidArgument{ argument_name: "p" });
+        return Err(Error::InvalidArgument{ argument_name: "p" }.into());
     }
 
     unsafe {

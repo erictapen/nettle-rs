@@ -45,7 +45,7 @@ impl PssHash for Sha256 {
             } else {
                 __gmpz_clear(&mut sig);
 
-                Err(Error::SigningFailed)
+                Err(Error::SigningFailed.into())
             }
         }
     }
@@ -80,7 +80,7 @@ impl PssHash for Sha384 {
             } else {
                 __gmpz_clear(&mut sig);
 
-                Err(Error::SigningFailed)
+                Err(Error::SigningFailed.into())
             }
         }
     }
@@ -115,7 +115,7 @@ impl PssHash for Sha512 {
             } else {
                 __gmpz_clear(&mut sig);
 
-                Err(Error::SigningFailed)
+                Err(Error::SigningFailed.into())
             }
         }
     }

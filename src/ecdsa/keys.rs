@@ -45,7 +45,7 @@ impl PrivateKey {
             } else {
                 __gmpz_clear(&mut mpz as *mut _);
 
-                Err(Error::InvalidArgument{ argument_name: "num" })
+                Err(Error::InvalidArgument{ argument_name: "num" }.into())
             }
         }
     }
@@ -122,7 +122,7 @@ impl PublicKey {
                 __gmpz_clear(&mut x_mpz as *mut _);
                 __gmpz_clear(&mut y_mpz as *mut _);
 
-                Err(Error::InvalidArgument{ argument_name: "x or y" })
+                Err(Error::InvalidArgument{ argument_name: "x or y" }.into())
             }
         }
     }

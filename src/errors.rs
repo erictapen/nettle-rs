@@ -1,3 +1,5 @@
+use failure;
+
 #[derive(Debug,Fail)]
 /// Nettle error type.
 pub enum Error {
@@ -25,4 +27,4 @@ pub enum Error {
 }
 
 /// Specialized Result type.
-pub type Result<T> = ::std::result::Result<T,Error>;
+pub type Result<T> = ::std::result::Result<T,failure::Error>;

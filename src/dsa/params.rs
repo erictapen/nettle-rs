@@ -53,7 +53,7 @@ impl Params {
             if nettle_dsa_generate_params(&mut ret as *mut _, random.context(), Some(R::random), ptr::null_mut(), None, p_bits as u32, q_bits as u32) == 1 {
                 Ok(Params{ params: ret })
             } else {
-                Err(Error::InvalidBitSizes)
+                Err(Error::InvalidBitSizes.into())
             }
         }
     }
