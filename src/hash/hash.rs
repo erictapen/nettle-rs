@@ -14,6 +14,9 @@ pub trait Hash {
     /// at least DIGEST_SIZE bytes large, otherwise the digest will be truncated. Resets the hash
     /// function contexts.
     fn digest(&mut self, digest: &mut [u8]);
+
+    /// Clones the hash context into a Box.
+    fn box_clone(&self) -> Box<Hash>;
 }
 
 /// Nettle context a.k.a. `<hash>_ctx` of this hash
@@ -36,6 +39,16 @@ impl Hash for Box<Hash> {
 
     fn digest(&mut self, digest: &mut [u8]) {
         self.as_mut().digest(digest)
+    }
+
+    fn box_clone(&self) -> Box<Hash> {
+        self.as_ref().box_clone()
+    }
+}
+
+impl Clone for Box<Hash> {
+    fn clone(&self) -> Self {
+        self.as_ref().box_clone()
     }
 }
 

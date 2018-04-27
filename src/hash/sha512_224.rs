@@ -11,11 +11,24 @@ use std::mem::zeroed;
 use Hash;
 use hash::NettleHash;
 
-#[allow(non_camel_case_types)]
 /// 512 bit variant of the Secure Hash Algorithm 2 (SHA-2) defined in FIPS 180-4, truncated to 224
 /// bit.
+#[allow(non_camel_case_types)]
 pub struct Sha512_224 {
     context: sha512_ctx,
+}
+
+impl Clone for Sha512_224 {
+    fn clone(&self) -> Self {
+        use std::intrinsics::copy_nonoverlapping;
+
+        unsafe {
+            let mut ctx: sha512_ctx = zeroed();
+            copy_nonoverlapping(&self.context, &mut ctx, 1);
+
+            Sha512_224{ context: ctx }
+        }
+    }
 }
 
 impl Default for Sha512_224 {
@@ -41,6 +54,10 @@ impl Hash for Sha512_224 {
         unsafe {
             nettle_sha512_224_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
+    }
+
+    fn box_clone(&self) -> Box<Hash> {
+        Box::new(self.clone())
     }
 }
 

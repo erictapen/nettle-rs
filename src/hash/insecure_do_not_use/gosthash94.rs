@@ -20,6 +20,19 @@ pub struct GostHash94 {
     context: gosthash94_ctx,
 }
 
+impl Clone for GostHash94 {
+    fn clone(&self) -> Self {
+        use std::intrinsics::copy_nonoverlapping;
+
+        unsafe {
+            let mut ctx: gosthash94_ctx = zeroed();
+            copy_nonoverlapping(&self.context, &mut ctx, 1);
+
+            GostHash94{ context: ctx }
+        }
+    }
+}
+
 impl Default for GostHash94 {
     fn default() -> Self {
         let mut ctx = unsafe { zeroed() };
@@ -43,6 +56,10 @@ impl Hash for GostHash94 {
         unsafe {
             nettle_gosthash94_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
+    }
+
+    fn box_clone(&self) -> Box<Hash> {
+        Box::new(self.clone())
     }
 }
 

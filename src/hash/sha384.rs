@@ -17,6 +17,19 @@ pub struct Sha384 {
     context: sha512_ctx,
 }
 
+impl Clone for Sha384 {
+    fn clone(&self) -> Self {
+        use std::intrinsics::copy_nonoverlapping;
+
+        unsafe {
+            let mut ctx: sha512_ctx = zeroed();
+            copy_nonoverlapping(&self.context, &mut ctx, 1);
+
+            Sha384{ context: ctx }
+        }
+    }
+}
+
 impl Default for Sha384 {
     fn default() -> Self {
         let mut ctx = unsafe { zeroed() };
@@ -40,6 +53,10 @@ impl Hash for Sha384 {
         unsafe {
             nettle_sha384_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
+    }
+
+    fn box_clone(&self) -> Box<Hash> {
+        Box::new(self.clone())
     }
 }
 

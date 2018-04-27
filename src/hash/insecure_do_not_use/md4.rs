@@ -20,6 +20,19 @@ pub struct Md4 {
     context: md4_ctx,
 }
 
+impl Clone for Md4 {
+    fn clone(&self) -> Self {
+        use std::intrinsics::copy_nonoverlapping;
+
+        unsafe {
+            let mut ctx: md4_ctx = zeroed();
+            copy_nonoverlapping(&self.context, &mut ctx, 1);
+
+            Md4{ context: ctx }
+        }
+    }
+}
+
 impl Default for Md4 {
     fn default() -> Self {
         let mut ctx = unsafe { zeroed() };
@@ -43,6 +56,10 @@ impl Hash for Md4 {
         unsafe {
             nettle_md4_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
+    }
+
+    fn box_clone(&self) -> Box<Hash> {
+        Box::new(self.clone())
     }
 }
 

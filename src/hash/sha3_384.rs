@@ -11,10 +11,23 @@ use std::mem::zeroed;
 use Hash;
 use hash::NettleHash;
 
-#[allow(non_camel_case_types)]
 /// 384 bit variant of the Secure Hash Algorithm 3 (SHA-3) defined in FIPS 202.
+#[allow(non_camel_case_types)]
 pub struct Sha3_384 {
     context: sha3_384_ctx,
+}
+
+impl Clone for Sha3_384 {
+    fn clone(&self) -> Self {
+        use std::intrinsics::copy_nonoverlapping;
+
+        unsafe {
+            let mut ctx: sha3_384_ctx = zeroed();
+            copy_nonoverlapping(&self.context, &mut ctx, 1);
+
+            Sha3_384{ context: ctx }
+        }
+    }
 }
 
 impl Default for Sha3_384 {
@@ -40,6 +53,10 @@ impl Hash for Sha3_384 {
         unsafe {
             nettle_sha3_384_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
+    }
+
+    fn box_clone(&self) -> Box<Hash> {
+        Box::new(self.clone())
     }
 }
 

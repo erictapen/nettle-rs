@@ -16,6 +16,19 @@ pub struct Sha256 {
     context: sha256_ctx,
 }
 
+impl Clone for Sha256 {
+    fn clone(&self) -> Self {
+        use std::intrinsics::copy_nonoverlapping;
+
+        unsafe {
+            let mut ctx: sha256_ctx = zeroed();
+            copy_nonoverlapping(&self.context, &mut ctx, 1);
+
+            Sha256{ context: ctx }
+        }
+    }
+}
+
 impl Default for Sha256 {
     fn default() -> Self {
         let mut ctx = unsafe { zeroed() };
@@ -39,6 +52,10 @@ impl Hash for Sha256 {
         unsafe {
             nettle_sha256_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
+    }
+
+    fn box_clone(&self) -> Box<Hash> {
+        Box::new(self.clone())
     }
 }
 

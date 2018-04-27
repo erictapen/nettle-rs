@@ -20,6 +20,19 @@ pub struct Sha1 {
     context: sha1_ctx,
 }
 
+impl Clone for Sha1 {
+    fn clone(&self) -> Self {
+        use std::intrinsics::copy_nonoverlapping;
+
+        unsafe {
+            let mut ctx: sha1_ctx = zeroed();
+            copy_nonoverlapping(&self.context, &mut ctx, 1);
+
+            Sha1{ context: ctx }
+        }
+    }
+}
+
 impl Default for Sha1 {
     fn default() -> Self {
         let mut ctx = unsafe { zeroed() };
@@ -43,6 +56,10 @@ impl Hash for Sha1 {
         unsafe {
             nettle_sha1_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
+    }
+
+    fn box_clone(&self) -> Box<Hash> {
+        Box::new(self.clone())
     }
 }
 

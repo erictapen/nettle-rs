@@ -34,6 +34,11 @@ impl Fubar {
         self.bar.hash(&mut h);
         self.baz.hash(&mut h);
 
+        let mut g = h.clone();
+        self.foo.hash(&mut g);
+        self.bar.hash(&mut g);
+        self.baz.hash(&mut g);
+
         let mut ret = vec![0u8; h.digest_size()];
         h.digest(&mut ret);
 

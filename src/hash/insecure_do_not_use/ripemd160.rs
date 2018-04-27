@@ -20,6 +20,19 @@ pub struct Ripemd160 {
     context: ripemd160_ctx,
 }
 
+impl Clone for Ripemd160 {
+    fn clone(&self) -> Self {
+        use std::intrinsics::copy_nonoverlapping;
+
+        unsafe {
+            let mut ctx: ripemd160_ctx = zeroed();
+            copy_nonoverlapping(&self.context, &mut ctx, 1);
+
+            Ripemd160{ context: ctx }
+        }
+    }
+}
+
 impl Default for Ripemd160 {
     fn default() -> Self {
         let mut ctx = unsafe { zeroed() };
@@ -43,6 +56,10 @@ impl Hash for Ripemd160 {
         unsafe {
             nettle_ripemd160_digest(&mut self.context as *mut _, digest.len(), digest.as_mut_ptr());
         }
+    }
+
+    fn box_clone(&self) -> Box<Hash> {
+        Box::new(self.clone())
     }
 }
 
