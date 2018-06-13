@@ -1,3 +1,6 @@
+use std::io;
+use std::io::Write;
+
 use nettle_sys::nettle_hash;
 
 /// Hash function.
@@ -52,6 +55,15 @@ impl Clone for Box<Hash> {
     }
 }
 
+impl Write for Hash {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        self.update(buf);
+        Ok(buf.len())
+    }
+
+    fn flush(&mut self) -> io::Result<()> { Ok(()) }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -102,5 +114,25 @@ mod tests {
             hash_with(&mut h,test);
             h.digest(&mut ret);
         }
+    }
+
+    #[test]
+    fn write_trait() {
+        use hash::Sha256;
+        use std::io::Write;
+        use Hash;
+
+        let mut h1: Box<Hash> = Box::new(Sha256::default());
+        let mut d1 = [0u8; 256 / 8];
+        let mut h2 = Sha256::default();
+        let mut d2 = [0u8; 256 / 8];
+
+        h1.write_all(&b"test123"[..]).unwrap();
+        h2.update(&b"test123"[..]);
+
+        h1.digest(&mut d1);
+        h2.digest(&mut d2);
+
+        assert_eq!(d1, d2);
     }
 }
