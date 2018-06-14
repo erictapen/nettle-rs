@@ -140,7 +140,7 @@ pub fn verify_pkcs1<H: Hash + Pkcs1Hash>(public: &PublicKey, hash: &mut H, signa
     verify_digest_pkcs1(public,&dst,hash.oid(),signature)
 }
 
-/// Encrypts `plaintext` using `public`, producing `ciphertext`. Both buffers are expected to have
+/// Encrypts `plaintext` using `public`, producing `ciphertext`. `ciphertext` must have
 /// the same size as the modulo of `public`.
 ///
 /// The plaintext is padded using `RSAES-PKCS1-v1_5`.
